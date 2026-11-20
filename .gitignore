@@ -1,0 +1,28 @@
+# zavisnosti
+node_modules/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# lokalna baza
+data/*.db
+data/*.db-*
+
+# okruženje (tajne)
+.env*.local
+.env
+
+# ostalo
+.DS_Store
+.vercel
+npm-debug.log*
+
+.vercel
+.env*
+
+# lokalna podešavanja alata i privremeni fajlovi
+.claude/settings.local.json
+.tmp/

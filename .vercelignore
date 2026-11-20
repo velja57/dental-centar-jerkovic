@@ -1,0 +1,5 @@
+# Ne šalje se na Vercel: lokalna podešavanja/tajne i lokalna baza sa demo podacima
+.env*
+data/
+.next/
+node_modules/

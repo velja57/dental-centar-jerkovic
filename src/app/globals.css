@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brend: smiraujuća tirkizna (poverenje, higijena) + topla korala (prijateljski, poziv na akciju) */
+  --color-brand-50: #effaf8;
+  --color-brand-100: #d5f3ee;
+  --color-brand-200: #ace6dd;
+  --color-brand-300: #74d1c5;
+  --color-brand-400: #3fb5a9;
+  --color-brand-500: #22988e;
+  --color-brand-600: #187a73;
+  --color-brand-700: #17625d;
+  --color-brand-800: #174f4b;
+  --color-brand-900: #16423f;
+  --color-brand-950: #062725;
+
+  --color-coral-50: #fff4f0;
+  --color-coral-100: #ffe5db;
+  --color-coral-200: #ffc8b4;
+  --color-coral-300: #ffa283;
+  --color-coral-400: #fb7a52;
+  --color-coral-500: #f05a2f;
+  --color-coral-600: #d63f1a;
+  --color-coral-700: #b33315;
+
+  --color-sand-50: #fdfbf7;
+  --color-sand-100: #f8f3ea;
+  --color-sand-200: #efe5d3;
+
+  --color-ink: #10292a;
+
+  --shadow-soft: 0 1px 2px rgb(16 41 42 / 0.05), 0 10px 30px -12px rgb(16 41 42 / 0.16);
+  --shadow-lift: 0 2px 6px rgb(16 41 42 / 0.06), 0 24px 48px -16px rgb(16 41 42 / 0.28);
+
+  --animate-fade-up: fade-up 0.45s ease-out both;
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@theme inline {
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background-color: #fff;
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  ::selection {
+    background: var(--color-brand-200);
+    color: var(--color-brand-950);
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-coral-400);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  summary {
+    cursor: pointer;
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+  .eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full bg-brand-100/80 px-3 py-1 text-[13px] font-semibold tracking-wide text-brand-800;
+  }
+  .h2 {
+    @apply text-3xl font-extrabold tracking-tight text-balance text-ink sm:text-4xl;
+  }
+  .lead {
+    @apply text-lg leading-relaxed text-pretty text-slate-600;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[15px] font-semibold whitespace-nowrap transition duration-150 select-none disabled:pointer-events-none disabled:opacity-55;
+  }
+  .btn-lg {
+    @apply px-6 py-3.5 text-base;
+  }
+  .btn-sm {
+    @apply px-3.5 py-1.5 text-sm;
+  }
+  .btn-primary {
+    @apply bg-coral-600 text-white shadow-[0_10px_24px_-10px_rgb(214_63_26/0.7)] hover:bg-coral-700;
+  }
+  .btn-brand {
+    @apply bg-brand-600 text-white hover:bg-brand-700;
+  }
+  .btn-outline {
+    @apply border border-brand-200 bg-white text-brand-800 hover:border-brand-300 hover:bg-brand-50;
+  }
+  .btn-ghost {
+    @apply text-brand-800 hover:bg-brand-50;
+  }
+  .btn-light {
+    @apply bg-white text-brand-900 hover:bg-brand-50;
+  }
+  .btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700;
+  }
+  .card {
+    @apply rounded-3xl border border-slate-200/70 bg-white shadow-soft;
+  }
+  .input {
+    @apply w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-[15px] text-ink transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 focus:outline-none;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-semibold text-slate-700;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap;
+  }
+  .hatch {
+    background-image: repeating-linear-gradient(135deg, rgb(148 163 184 / 0.28) 0 6px, transparent 6px 12px);
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
