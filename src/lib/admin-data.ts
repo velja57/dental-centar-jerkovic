@@ -127,11 +127,16 @@ const P_CHARGED = sql<number>`(select coalesce(sum(t.total), 0) from treatments 
 const P_PAID = sql<number>`(select coalesce(sum(y.amount), 0) from payments y where y.patient_id = "patients"."id")`;
 
 export async function outstanding() {
-  const rows = await db.select({ id: patients.id, charged: P_CHARGED, paid: P_PAID }).from(patients);
+  // Dva grupisana upita umesto podupita za svakog pacijenta
+  const [charged, paidRows] = await Promise.all([
+    db.select({ pid: treatments.patientId, v: sql<number>`sum(${treatments.total})` }).from(treatments).groupBy(treatments.patientId),
+    db.select({ pid: payments.patientId, v: sql<number>`sum(${payments.amount})` }).from(payments).groupBy(payments.patientId),
+  ]);
+  const paid = new Map(paidRows.map((r) => [r.pid, r.v]));
   let total = 0;
   let count = 0;
-  for (const r of rows) {
-    const d = r.charged - r.paid;
+  for (const r of charged) {
+    const d = r.v - (paid.get(r.pid) ?? 0);
     if (d > 0) {
       total += d;
       count++;
@@ -170,22 +175,15 @@ export async function dashboardData(s: Session) {
   return { now, today, pending, upcoming, month, prevMonth, debt };
 }
 
-export async function calendarData(from: string, to: string, doctorIds: number[]) {
-  if (doctorIds.length === 0) return { items: [], sch: [], off: [] };
+/** Termini, rasporedi i odsustva za period — za sve doktore (filtrira se na stranici), u jednom paralelnom krugu. */
+export async function calendarData(from: string, to: string) {
   const [items, sch, off] = await Promise.all([
-    apptQuery(
-      and(
-        gte(appointments.date, from),
-        lte(appointments.date, to),
-        inArray(appointments.doctorId, doctorIds),
-        inArray(appointments.status, ["confirmed", "completed", "no_show"]),
-      ),
-    ),
-    db.select().from(schedules).where(inArray(schedules.doctorId, doctorIds)),
+    apptQuery(and(gte(appointments.date, from), lte(appointments.date, to), inArray(appointments.status, ["confirmed", "completed", "no_show"]))),
+    db.select().from(schedules),
     db
       .select()
       .from(timeOff)
-      .where(and(lte(timeOff.dateFrom, to), gte(timeOff.dateTo, from), or(isNull(timeOff.doctorId), inArray(timeOff.doctorId, doctorIds)))),
+      .where(and(lte(timeOff.dateFrom, to), gte(timeOff.dateTo, from))),
   ]);
   return { items, sch, off };
 }
@@ -229,9 +227,10 @@ export async function listAppointments(s: Session, filter: ListFilter, q: string
 }
 
 export async function appointmentDetail(id: number) {
-  const [appt] = await apptQuery(eq(appointments.id, id));
-  if (!appt) return null;
-  const [tr, pay, balance] = await Promise.all([
+  // Sve u jednom paralelnom krugu: pacijent za saldo se nalazi podupitom, bez čekanja na prvi upit
+  const pid = sql`(select a.patient_id from appointments a where a.id = ${id})`;
+  const [[appt], tr, pay, [c], [p]] = await Promise.all([
+    apptQuery(eq(appointments.id, id)),
     db
       .select({ t: treatments, doctorName: doctors.name })
       .from(treatments)
@@ -239,9 +238,11 @@ export async function appointmentDetail(id: number) {
       .where(eq(treatments.appointmentId, id))
       .orderBy(asc(treatments.id)),
     db.select().from(payments).where(eq(payments.appointmentId, id)).orderBy(asc(payments.id)),
-    patientBalance(appt.patientId),
+    db.select({ v: sql<number>`coalesce(sum(${treatments.total}), 0)` }).from(treatments).where(sql`${treatments.patientId} = ${pid}`),
+    db.select({ v: sql<number>`coalesce(sum(${payments.amount}), 0)` }).from(payments).where(sql`${payments.patientId} = ${pid}`),
   ]);
-  return { appt, treatments: tr, payments: pay, balance };
+  if (!appt) return null;
+  return { appt, treatments: tr, payments: pay, balance: { charged: c.v, paid: p.v, debt: c.v - p.v } };
 }
 
 export async function patientBalance(patientId: number) {
@@ -276,14 +277,14 @@ export async function listPatients(q: string) {
 }
 
 export async function patientDetail(id: number) {
-  const [p] = await db.select().from(patients).where(eq(patients.id, id));
-  if (!p) return null;
-  const [appts, tr, pay, balance] = await Promise.all([
+  const [[p], appts, tr, pay, balance] = await Promise.all([
+    db.select().from(patients).where(eq(patients.id, id)),
     apptQuery(eq(appointments.patientId, id)).orderBy(desc(appointments.date), desc(appointments.startMin)),
     db.select().from(treatments).where(eq(treatments.patientId, id)).orderBy(desc(treatments.date), desc(treatments.id)),
     db.select().from(payments).where(eq(payments.patientId, id)).orderBy(desc(payments.date), desc(payments.id)),
     patientBalance(id),
   ]);
+  if (!p) return null;
   return { patient: p, appts, treatments: tr, payments: pay, balance };
 }
 

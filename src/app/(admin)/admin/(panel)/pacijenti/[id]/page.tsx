@@ -17,13 +17,12 @@ export const metadata: Metadata = { title: "Karton pacijenta" };
 type Props = { params: Promise<{ id: string }> };
 
 export default async function PatientPage({ params }: Props) {
-  await requireSession();
-  const id = Number((await params).id);
+  const [, { id: rawId }] = await Promise.all([requireSession(), params]);
+  const id = Number(rawId);
   if (!Number.isInteger(id)) notFound();
-  const data = await patientDetail(id);
+  const [data, svcs] = await Promise.all([patientDetail(id), allServices()]);
   if (!data) notFound();
   const { patient: p, appts, treatments, payments, balance } = data;
-  const svcs = await allServices();
   const now = nowInClinic();
   const completed = appts.filter((a) => a.status === "completed").length;
   const noShows = appts.filter((a) => a.status === "no_show").length;
@@ -82,7 +81,8 @@ export default async function PatientPage({ params }: Props) {
               <ul className="divide-y divide-slate-100">
                 {appts.map((a) => (
                   <li key={a.id}>
-                    <Link href={`/admin/termini/${a.id}`} className="flex items-center justify-between gap-3 px-5 py-3 text-sm hover:bg-slate-50">
+                    <Link prefetch={false}
+                  href={`/admin/termini/${a.id}`} className="flex items-center justify-between gap-3 px-5 py-3 text-sm hover:bg-slate-50">
                       <span className="min-w-0">
                         <span className="block font-semibold text-ink">
                           {a.date ? `${fmtDateMedium(a.date, "sr")} ${a.startMin != null ? minToTime(a.startMin) : ""}` : "Zahtev bez termina"}

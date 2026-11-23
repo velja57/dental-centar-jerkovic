@@ -14,14 +14,12 @@ export const metadata: Metadata = { title: "Izveštaji" };
 type Props = { searchParams: Promise<{ m?: string; doc?: string }> };
 
 export default async function ReportsPage({ searchParams }: Props) {
-  const s = await requireSession();
-  const sp = await searchParams;
+  const [s, sp] = await Promise.all([requireSession(), searchParams]);
   const now = nowInClinic();
   const ym = sp.m && /^\d{4}-\d{2}$/.test(sp.m) ? sp.m : now.date.slice(0, 7);
-  const docs = await allDoctors();
   const isAdmin = s.role === "admin";
   const doctorId = isAdmin ? (sp.doc && sp.doc !== "all" ? Number(sp.doc) : null) : s.id;
-  const r = await reportData(ym, doctorId);
+  const [docs, r] = await Promise.all([allDoctors(), reportData(ym, doctorId)]);
   const c = r.cur;
   const p = r.prv;
   const isCurrent = ym === now.date.slice(0, 7);

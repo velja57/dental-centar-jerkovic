@@ -24,14 +24,13 @@ export const metadata: Metadata = { title: "Termin" };
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ novo?: string }> };
 
 export default async function AppointmentDetailPage({ params, searchParams }: Props) {
-  const s = await requireSession();
-  const id = Number((await params).id);
-  const sp = await searchParams;
+  const [s, { id: rawId }, sp] = await Promise.all([requireSession(), params, searchParams]);
+  const id = Number(rawId);
   if (!Number.isInteger(id)) notFound();
-  const data = await appointmentDetail(id);
+  // Termin, doktori i cenovnik u jednom paralelnom krugu
+  const [data, docs, svcs] = await Promise.all([appointmentDetail(id), allDoctors(), allServices()]);
   if (!data) notFound();
   const { appt: a, treatments, payments, balance } = data;
-  const [docs, svcs] = await Promise.all([allDoctors(), allServices()]);
   const now = nowInClinic();
   const canEdit = s.role === "admin" || a.doctorId === null || a.doctorId === s.id;
   const scheduled = a.date != null && a.startMin != null;

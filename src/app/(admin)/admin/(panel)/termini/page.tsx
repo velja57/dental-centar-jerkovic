@@ -105,6 +105,7 @@ export default async function AppointmentsPage({ searchParams }: Props) {
             {rows.map((a) => (
               <li key={a.id}>
                 <Link
+                  prefetch={false}
                   href={`/admin/termini/${a.id}`}
                   className="grid gap-1 px-5 py-3.5 hover:bg-slate-50 lg:grid-cols-[10.5rem_1.3fr_1.4fr_9rem_5.5rem_8.5rem] lg:items-center lg:gap-4"
                 >

@@ -1,7 +1,18 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
+
+/** Mali indikator na kliknutoj stavci menija dok se stranica učitava (vidi se samo ako traje >120 ms). */
+function PendingDot() {
+  const { pending } = useLinkStatus();
+  return (
+    <span
+      aria-hidden="true"
+      className={`ml-auto h-2 w-2 shrink-0 rounded-full bg-current transition-opacity ${pending ? "animate-pulse opacity-70 delay-[120ms]" : "opacity-0"}`}
+    />
+  );
+}
 import { CalendarDays, ChartColumn, ExternalLink, Inbox, LayoutDashboard, ListChecks, LogOut, Mail, Settings, Users } from "lucide-react";
 import { LogoMark } from "@/components/site/Logo";
 
@@ -46,10 +57,12 @@ export function AdminNav({
       >
         <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
         <span>{it.label}</span>
-        {it.badge && pendingCount > 0 && (
+        {it.badge && pendingCount > 0 ? (
           <span className={`ml-auto rounded-full px-2 py-0.5 text-xs font-bold ${active ? "bg-white text-brand-700" : "bg-orange-100 text-orange-800"}`}>
             {pendingCount}
           </span>
+        ) : (
+          <PendingDot />
         )}
       </Link>
     );

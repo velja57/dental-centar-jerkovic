@@ -13,13 +13,17 @@ export const metadata: Metadata = { title: "Kalendar" };
 type Props = { searchParams: Promise<{ view?: string; d?: string; doc?: string }> };
 
 export default async function CalendarPage({ searchParams }: Props) {
-  const s = await requireSession();
-  const sp = await searchParams;
+  const [s, sp] = await Promise.all([requireSession(), searchParams]);
   const now = nowInClinic();
   const date = isValidDate(sp.d) ? sp.d : now.date;
-  const docs = (await allDoctors()).filter((d) => d.active);
   const isAdmin = s.role === "admin";
   const view: "day" | "week" = sp.view === "day" || sp.view === "week" ? sp.view : isAdmin ? "day" : "week";
+  const from = view === "day" ? date : startOfWeek(date);
+  const to = view === "day" ? date : addDays(from, 6);
+
+  // Doktori i podaci kalendara u jednom paralelnom krugu
+  const [docsAll, { items, sch, off }] = await Promise.all([allDoctors(), calendarData(from, to)]);
+  const docs = docsAll.filter((d) => d.active);
 
   // Doktor vidi samo svoj kalendar; administrator bira doktora ili sve (u prikazu dana)
   let selected: number | "all" = s.id;
@@ -27,11 +31,7 @@ export default async function CalendarPage({ searchParams }: Props) {
     if (sp.doc && sp.doc !== "all" && docs.some((d) => d.id === Number(sp.doc))) selected = Number(sp.doc);
     else selected = view === "day" ? "all" : (docs[0]?.id ?? s.id);
   }
-
-  const from = view === "day" ? date : startOfWeek(date);
-  const to = view === "day" ? date : addDays(from, 6);
   const shownDocs = selected === "all" ? docs : docs.filter((d) => d.id === selected);
-  const { items, sch, off } = await calendarData(from, to, shownDocs.map((d) => d.id));
 
   function columnFor(doctorId: number, day: string, title: string, subtitle?: string): GridColumn {
     const wd = weekdayOf(day);
@@ -75,7 +75,7 @@ export default async function CalendarPage({ searchParams }: Props) {
     const days = Array.from({ length: 7 }, (_, i) => addDays(from, i)).filter((day) => {
       const wd = weekdayOf(day);
       if (wd >= 1 && wd <= 5) return true;
-      return sch.some((r) => r.doctorId === doc?.id && r.weekday === wd) || items.some((a) => a.date === day);
+      return sch.some((r) => r.doctorId === doc?.id && r.weekday === wd) || items.some((a) => a.date === day && a.doctorId === doc?.id);
     });
     columns = doc
       ? days.map((day) => {

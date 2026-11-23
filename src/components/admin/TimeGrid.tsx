@@ -65,6 +65,7 @@ export function TimeGrid({ columns, nowMinutes }: { columns: GridColumn[]; nowMi
               Array.from({ length: Math.floor((e - s) / STEP) }, (_, i) => s + i * STEP).map((m) => (
                 <Link
                   key={`s${m}`}
+                  prefetch={false}
                   href={`/admin/termini/novi?date=${c.date}&time=${minToTime(m)}&doctor=${c.doctorId}`}
                   tabIndex={-1}
                   aria-hidden="true"
@@ -91,6 +92,7 @@ export function TimeGrid({ columns, nowMinutes }: { columns: GridColumn[]; nowMi
               return (
                 <Link
                   key={it.id}
+                  prefetch={false}
                   href={`/admin/termini/${it.id}`}
                   className="absolute inset-x-1 z-10 overflow-hidden rounded-lg border-l-4 px-2 py-1 text-xs leading-tight shadow-sm transition hover:z-20 hover:shadow-md"
                   style={{

@@ -65,7 +65,7 @@ export default async function PatientsPage({ searchParams }: Props) {
                 return (
                   <tr key={p.id} className="hover:bg-slate-50">
                     <td className="px-5 py-3">
-                      <Link href={`/admin/pacijenti/${p.id}`} className="font-bold text-ink hover:text-brand-700">
+                      <Link prefetch={false} href={`/admin/pacijenti/${p.id}`} className="font-bold text-ink hover:text-brand-700">
                         {p.fullName}
                       </Link>
                       {p.guardianName && <span className="block text-xs text-slate-500">roditelj: {p.guardianName}</span>}
