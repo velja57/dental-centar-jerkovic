@@ -20,7 +20,10 @@ npm run dev          # http://localhost:3100
 | Šta | Gde |
 |---|---|
 | Adresa, telefon, e-mail, radno vreme, ocena na Google-u, pravila zakazivanja (4h otkazivanje, 60 dana unapred…) | `src/content/clinic.ts` |
-| Tekstovi oblasti usluga (opis, prednosti, česta pitanja) | `src/content/services.ts` |
+| Google profil (Place ID, link „Napišite recenziju“), koordinate, Instagram, okolna naselja | `src/content/clinic.ts` |
+| Tekstovi oblasti usluga (opis, prednosti, kome je namenjeno, postupak, česta pitanja) i SEO naslovi (`seoTitle`, `h1`, `seo`) | `src/content/services.ts` |
+| Strukturirani podaci za Google (schema.org: Dentist, WebSite, FAQ, Breadcrumb) | `src/lib/jsonld.ts` (vrednosti dolaze iz `src/content/*`) |
+| Merenje konverzija (poziv, WhatsApp, Viber, navigacija, zakazivanje) | `src/lib/analytics.ts`, `src/components/site/SiteAnalytics.tsx` |
 | Cene, trajanje, ko radi uslugu, „odmah“ ili „na upit“ | admin → Podešavanja → Usluge i cene |
 | Tim (biografije, oblasti rada) | `src/content/team.ts` (ime i boja i u adminu → Doktori) |
 | Recenzije | `src/content/reviews.ts` |
@@ -54,6 +57,18 @@ Dok nije podešen `RESEND_API_KEY`, mejlovi se **samo beleže** u admin → Poru
 2. Baza: libSQL/Turso (`DATABASE_URL=libsql://…`, `DATABASE_AUTH_TOKEN`) ili SQLite fajl na VPS-u; zatim `npm run setup`.
 3. Slanje mejlova: `RESEND_API_KEY` i `EMAIL_FROM` (verifikovan domen).
 4. `AUTH_SECRET`, `CRON_SECRET`, `NEXT_PUBLIC_SITE_URL=https://vas-domen.rs`, `CLINIC_NOTIFY_EMAIL`.
+
+## SEO i merenje (posle povezivanja domena)
+
+- **Domen:** u Vercelu dodati domen (npr. `vas-domen.rs` kao glavni, `www` → preusmerenje na njega) i postaviti
+  `NEXT_PUBLIC_SITE_URL=https://vas-domen.rs`. Canonical adrese, sitemap i schema se same prebacuju na domen,
+  a stranice sa `*.vercel.app` se trajno (308) preusmeravaju na domen (`src/proxy.ts`).
+- **Google Search Console:** svojstvo „Domain“ preko DNS zapisa (preporuka) ili „URL prefix“ preko meta oznake:
+  kod iz GSC upisati u Vercel env `GOOGLE_SITE_VERIFICATION` i ponovo objaviti. Zatim poslati `https://vas-domen.rs/sitemap.xml`.
+- **Vercel Web Analytics:** Vercel → projekat → Analytics → Enable (bez kolačića, nije potreban baner).
+  Posete rade i na Hobby paketu; događaji (`phone_click`, `whatsapp_click`, `booking_completed`…) se prikazuju na Pro paketu.
+- **Google profil:** u polje „Website“ upisati `https://vas-domen.rs/?utm_source=google&utm_medium=organic&utm_campaign=gbp`.
+- Posle svake veće izmene proveriti: https://search.google.com/test/rich-results i https://pagespeed.web.dev/
 
 ## Privremene fotografije (Unsplash licenca, zameniti pravim)
 

@@ -5,17 +5,24 @@ import type { Locale } from "@/lib/i18n";
 type L = { sr: string; en: string };
 type LL = { sr: string[]; en: string[] };
 type QA = { q: string; a: string };
+type Step = { t: string; d: string };
 
 export type DentalIconName = "child" | "shield" | "braces" | "sparkle" | "filling" | "crown" | "implant" | "tooth";
 
+// SEO: seoTitle ide u <title> (+ " | Dental Centar Jerković"), h1 je naslov stranice, seo je meta description.
+// Medicinski tekstovi (forWhom, steps, faq) su opšti i konzervativni — pre objave ih pregleda stomatolog ordinacije.
 export type Category = {
   key: CategoryKey;
   icon: DentalIconName;
   image: SitePhoto;
   title: L;
+  seoTitle: L;
+  h1: L;
   short: L;
   intro: L;
   benefits: LL;
+  forWhom: LL;
+  steps: { sr: Step[]; en: Step[] };
   faq: { sr: QA[]; en: QA[] };
   seo: L;
 };
@@ -27,6 +34,8 @@ export const categories: Category[] = [
     icon: "child",
     image: images.kidDentist,
     title: { sr: "Dečja stomatologija", en: "Pediatric dentistry" },
+    seoTitle: { sr: "Dečji stomatolog u Batajnici", en: "Pediatric dentist in Batajnica" },
+    h1: { sr: "Dečji stomatolog u Batajnici", en: "Pediatric dentist in Batajnica, Belgrade" },
     short: {
       sr: "Strpljiv i nežan pristup, da prvi susret sa zubarom bude prijatno iskustvo.",
       en: "A patient, gentle approach that makes the first visit to the dentist a pleasant one.",
@@ -49,6 +58,32 @@ export const categories: Category[] = [
         "Advice for parents on diet, brushing and habits",
       ],
     },
+    forWhom: {
+      sr: [
+        "Bebama i maloj deci, od izbijanja prvih zuba",
+        "Predškolcima i školarcima, za redovne kontrole, popravke i zaštitu zuba",
+        "Deci koja se plaše zubara ili su imala neprijatno iskustvo",
+      ],
+      en: [
+        "Babies and toddlers, from the very first tooth",
+        "Pre-schoolers and school children, for check-ups, fillings and protection",
+        "Children who are afraid of the dentist or have had a bad experience",
+      ],
+    },
+    steps: {
+      sr: [
+        { t: "Upoznavanje", d: "Dete razgleda ordinaciju i stolicu, a mi sa roditeljem razgovaramo o navikama, ishrani i eventualnim tegobama." },
+        { t: "Pregled", d: "Pregledamo zube i desni i pratimo kako teku nicanje i smena zuba." },
+        { t: "Plan i saveti", d: "Roditelj dobija objašnjenje šta je potrebno, kojim redom i po kojoj ceni, kao i savete za pranje zuba kod kuće." },
+        { t: "Lečenje i kontrole", d: "Sa lečenjem počinjemo kada je dete spremno, a kontrole zakazujemo u skladu sa uzrastom i stanjem zuba." },
+      ],
+      en: [
+        { t: "Getting acquainted", d: "Your child explores the room and the chair while we talk with you about habits, diet and any problems." },
+        { t: "Check-up", d: "We examine the teeth and gums and keep an eye on how the teeth are coming through and changing." },
+        { t: "Plan and advice", d: "You get a clear explanation of what is needed, in what order and at what cost, plus tips for brushing at home." },
+        { t: "Treatment and follow-ups", d: "Treatment starts when your child is ready, and follow-ups are scheduled according to age and the state of the teeth." },
+      ],
+    },
     faq: {
       sr: [
         {
@@ -59,6 +94,14 @@ export const categories: Category[] = [
           q: "Da li treba lečiti mlečne zube kad ionako ispadaju?",
           a: "Da. Mlečni zubi čuvaju mesto za stalne, važni su za govor i žvakanje, a neizlečen karijes može da ošteti stalni zub koji raste ispod.",
         },
+        {
+          q: "Kako da pripremim dete za prvi pregled?",
+          a: "Govorite o pregledu mirno i bez reči kao što su „boli“ ili „bocka“. Prvi dolazak je upoznavanje, a roditelj je sve vreme uz dete.",
+        },
+        {
+          q: "Koliko često dete treba da ide na kontrolu?",
+          a: "Najčešće na šest meseci, a češće ako je dete sklono karijesu. Raspored kontrola stomatolog predlaže posle pregleda.",
+        },
       ],
       en: [
         {
@@ -68,6 +111,14 @@ export const categories: Category[] = [
         {
           q: "Do baby teeth need treatment if they fall out anyway?",
           a: "Yes. Baby teeth hold space for the permanent ones, matter for speech and chewing, and untreated decay can damage the permanent tooth growing underneath.",
+        },
+        {
+          q: "How can I prepare my child for the first visit?",
+          a: "Talk about it calmly and avoid words like “hurt” or “needle”. The first visit is just getting to know us, and a parent stays with the child the whole time.",
+        },
+        {
+          q: "How often should my child have a check-up?",
+          a: "Usually every six months, or more often if your child is prone to cavities. The dentist will suggest a schedule after the check-up.",
         },
       ],
     },
@@ -81,6 +132,8 @@ export const categories: Category[] = [
     icon: "shield",
     image: images.kidsBrushing,
     title: { sr: "Pregledi i prevencija", en: "Check-ups & prevention" },
+    seoTitle: { sr: "Pregled i uklanjanje kamenca u Batajnici", en: "Dental check-ups and scaling in Batajnica" },
+    h1: { sr: "Stomatološki pregled i uklanjanje kamenca", en: "Dental check-ups and scaling" },
     short: {
       sr: "Redovni pregledi, uklanjanje kamenca i peskiranje, najjeftiniji način da sačuvate zube.",
       en: "Regular check-ups, scaling and Air Flow polishing, the most affordable way to keep your teeth healthy.",
@@ -103,6 +156,32 @@ export const categories: Category[] = [
         "An automatic reminder for your six-month check-up",
       ],
     },
+    forWhom: {
+      sr: [
+        "Svima kojima je od poslednje kontrole prošlo više od šest meseci",
+        "Ako primećujete krvarenje desni, kamenac ili neprijatan zadah",
+        "Pušačima i ljubiteljima kafe i čaja koji žele da uklone mrlje sa zuba",
+      ],
+      en: [
+        "Anyone whose last check-up was more than six months ago",
+        "If you notice bleeding gums, tartar or bad breath",
+        "Smokers and coffee or tea lovers who want to remove stains",
+      ],
+    },
+    steps: {
+      sr: [
+        { t: "Razgovor i pregled", d: "Pregledamo zube, desni i postojeće plombe i pitamo vas da li vas nešto muči." },
+        { t: "Uklanjanje kamenca", d: "Kamenac uklanjamo ultrazvučnim aparatom, a zatim poliramo zube." },
+        { t: "Peskiranje po potrebi", d: "Mrlje od kafe, čaja ili duvana uklanjamo peskiranjem (Air Flow)." },
+        { t: "Saveti i podsetnik", d: "Dobijate savete za održavanje higijene, a sistem vas podseti kada je vreme za sledeću kontrolu." },
+      ],
+      en: [
+        { t: "Chat and check-up", d: "We examine your teeth, gums and existing fillings and ask whether anything is bothering you." },
+        { t: "Scaling", d: "Tartar is removed with an ultrasonic scaler, and then your teeth are polished." },
+        { t: "Air Flow if needed", d: "Coffee, tea or tobacco stains are removed with Air Flow polishing." },
+        { t: "Advice and a reminder", d: "You get hygiene tips, and our system reminds you when your next check-up is due." },
+      ],
+    },
     faq: {
       sr: [
         {
@@ -113,6 +192,10 @@ export const categories: Category[] = [
           q: "Da li je uklanjanje kamenca bolno?",
           a: "Ne. Moguća je blaga osetljivost, ali je tretman uglavnom potpuno komforan i traje oko pola sata.",
         },
+        {
+          q: "Koliko često treba ići na stomatološki pregled?",
+          a: "Za većinu dece i odraslih preporuka je jednom u šest meseci. Ako ste skloni karijesu ili problemima sa desnima, stomatolog može predložiti češće kontrole.",
+        },
       ],
       en: [
         {
@@ -122,6 +205,10 @@ export const categories: Category[] = [
         {
           q: "Does scaling hurt?",
           a: "No. You may feel mild sensitivity, but the treatment is usually completely comfortable and takes about half an hour.",
+        },
+        {
+          q: "How often should I see the dentist for a check-up?",
+          a: "For most children and adults the recommendation is every six months. If you're prone to cavities or gum problems, your dentist may suggest more frequent visits.",
         },
       ],
     },
@@ -135,6 +222,8 @@ export const categories: Category[] = [
     icon: "braces",
     image: images.aligners,
     title: { sr: "Ortodoncija", en: "Orthodontics" },
+    seoTitle: { sr: "Ortodont u Batajnici – aparatići i folije", en: "Orthodontist in Batajnica – braces and aligners" },
+    h1: { sr: "Ortodont u Batajnici", en: "Orthodontist in Batajnica, Belgrade" },
     short: {
       sr: "Ravni zubi u svakom uzrastu: mobilni i fiksni aparati i providne folije.",
       en: "Straight teeth at any age: removable and fixed braces and clear aligners.",
@@ -157,6 +246,32 @@ export const categories: Category[] = [
         "Treatment payable in instalments",
       ],
     },
+    forWhom: {
+      sr: [
+        "Deci u razvoju, kod koje se mnoge nepravilnosti mogu ispraviti na vreme",
+        "Tinejdžerima i odraslima sa krivim, zbijenim ili razmaknutim zubima",
+        "Odraslima koji žele diskretnije rešenje: safirni aparat ili providne folije",
+      ],
+      en: [
+        "Growing children, when many problems can be corrected early",
+        "Teenagers and adults with crooked, crowded or gapped teeth",
+        "Adults who want a more discreet option: sapphire braces or clear aligners",
+      ],
+    },
+    steps: {
+      sr: [
+        { t: "Konsultacija", d: "Ortodont pregleda zube i zagrižaj, objasni šta primećuje i da li je terapija potrebna." },
+        { t: "Dijagnostika i plan", d: "Na osnovu otisaka ili skeniranja i rendgenskih snimaka pravi se plan terapije, sa okvirnim trajanjem i cenom." },
+        { t: "Postavljanje aparata", d: "Aparat se predaje ili postavlja u jednoj poseti, uz uputstva za nošenje i održavanje." },
+        { t: "Kontrole i retencija", d: "Na kontrole se dolazi najčešće na četiri do osam nedelja. Posle terapije retejner čuva postignut rezultat." },
+      ],
+      en: [
+        { t: "Consultation", d: "The orthodontist checks your teeth and bite, explains what they see and whether treatment is needed." },
+        { t: "Records and plan", d: "Impressions or a scan and X-rays are used to make a treatment plan with an estimated duration and price." },
+        { t: "Fitting the appliance", d: "The appliance is fitted or handed over in one visit, with instructions for wearing and cleaning it." },
+        { t: "Follow-ups and retention", d: "Adjustment visits are usually every four to eight weeks. After treatment, a retainer keeps the result in place." },
+      ],
+    },
     faq: {
       sr: [
         {
@@ -167,6 +282,10 @@ export const categories: Category[] = [
           q: "Da li odrasli mogu da nose aparatić?",
           a: "Naravno. Zubi se pomeraju u svakom uzrastu, a odraslima su najčešće zanimljive estetske opcije: safirni aparat ili providne folije.",
         },
+        {
+          q: "Kada je vreme za prvi ortodontski pregled?",
+          a: "Preporučuje se da dete prvi put pregleda ortodont oko sedme godine, kada se mnoge nepravilnosti mogu uočiti na vreme. Za ortodontsku terapiju nije kasno ni u odraslom dobu.",
+        },
       ],
       en: [
         {
@@ -176,6 +295,10 @@ export const categories: Category[] = [
         {
           q: "Can adults wear braces?",
           a: "Absolutely. Teeth can move at any age, and adults often prefer the aesthetic options: sapphire braces or clear aligners.",
+        },
+        {
+          q: "When should my child first see an orthodontist?",
+          a: "Around the age of seven is recommended, when many problems can be spotted early. And it's never too late: adults can have orthodontic treatment too.",
         },
       ],
     },
@@ -189,6 +312,8 @@ export const categories: Category[] = [
     icon: "sparkle",
     image: images.smile,
     title: { sr: "Estetska stomatologija", en: "Cosmetic dentistry" },
+    seoTitle: { sr: "Beljenje zuba i fasete u Batajnici", en: "Teeth whitening and veneers in Batajnica" },
+    h1: { sr: "Beljenje zuba i estetska stomatologija", en: "Teeth whitening and cosmetic dentistry" },
     short: {
       sr: "Beljenje, fasete i kompozitne korekcije za osmeh kojim ćete se ponositi.",
       en: "Whitening, veneers and composite bonding for a smile you'll be proud of.",
@@ -211,6 +336,32 @@ export const categories: Category[] = [
         "A plan and price upfront, with no surprises",
       ],
     },
+    forWhom: {
+      sr: [
+        "Onima kojima smeta boja zuba ili mrlje koje ne skida obično pranje",
+        "Pacijentima sa okrnjenim, neujednačenim ili razmaknutim prednjim zubima",
+        "Svima koji pre važnog događaja žele svetliji i ujednačeniji osmeh",
+      ],
+      en: [
+        "Anyone bothered by tooth colour or stains that brushing won't remove",
+        "Patients with chipped, uneven or gapped front teeth",
+        "Anyone who wants a brighter, more even smile before a big event",
+      ],
+    },
+    steps: {
+      sr: [
+        { t: "Pregled i želje", d: "Proveravamo zdravlje zuba i desni i razgovaramo o tome šta biste voleli da promenite." },
+        { t: "Priprema", d: "Pre beljenja ili faseta rešavamo karijes i uklanjamo kamenac, jer se tretman radi samo na zdravim zubima." },
+        { t: "Tretman", d: "Beljenje se radi u ordinaciji ili kod kuće, uz folije i gel, a fasete prema planu koji smo zajedno dogovorili." },
+        { t: "Održavanje", d: "Dobijate savete kako da rezultat što duže traje i kada da dođete na kontrolu." },
+      ],
+      en: [
+        { t: "Check-up and goals", d: "We check the health of your teeth and gums and talk about what you'd like to change." },
+        { t: "Preparation", d: "Any decay and tartar are treated first, because cosmetic treatment is only done on healthy teeth." },
+        { t: "Treatment", d: "Whitening is done in the office or at home with trays and gel, and veneers follow the plan we agree together." },
+        { t: "Aftercare", d: "You get advice on making the result last and on when to come back for a check-up." },
+      ],
+    },
     faq: {
       sr: [
         {
@@ -221,6 +372,10 @@ export const categories: Category[] = [
           q: "Koliko traju keramičke fasete?",
           a: "Uz dobru higijenu i redovne kontrole keramičke fasete traju 10 do 15 godina, a često i duže.",
         },
+        {
+          q: "Da li beljenje menja boju plombi i krunica?",
+          a: "Ne. Beljenje deluje samo na prirodne zube, pa se plombe ili krunice na vidljivim mestima ponekad menjaju posle beljenja, da bi se boja uskladila. O tome razgovaramo pre tretmana.",
+        },
       ],
       en: [
         {
@@ -230,6 +385,10 @@ export const categories: Category[] = [
         {
           q: "How long do ceramic veneers last?",
           a: "With good hygiene and regular check-ups, ceramic veneers last 10 to 15 years, often longer.",
+        },
+        {
+          q: "Does whitening change the colour of fillings and crowns?",
+          a: "No. Whitening only works on natural teeth, so visible fillings or crowns are sometimes replaced afterwards to match the new shade. We discuss this before treatment.",
         },
       ],
     },
@@ -243,6 +402,8 @@ export const categories: Category[] = [
     icon: "filling",
     image: images.treatment,
     title: { sr: "Lečenje zuba", en: "General dentistry" },
+    seoTitle: { sr: "Lečenje i popravka zuba u Batajnici", en: "Fillings and root canal treatment in Batajnica" },
+    h1: { sr: "Lečenje i popravka zuba", en: "Fillings, root canals and extractions" },
     short: {
       sr: "Popravka zuba, lečenje kanala i vađenje, bezbolno, uz lokalnu anesteziju.",
       en: "Fillings, root canals and extractions, pain-free with local anaesthesia.",
@@ -255,6 +416,32 @@ export const categories: Category[] = [
       sr: ["Bele (kompozitne) plombe u boji zuba", "Lečenje kanala korena", "Vađenje zuba i umnjaka", "Hitne intervencije kod zubobolje"],
       en: ["Tooth-coloured composite fillings", "Root canal treatment", "Tooth and wisdom tooth extraction", "Emergency appointments for toothache"],
     },
+    forWhom: {
+      sr: [
+        "Ako vas boli zub ili ste osetljivi na hladno, toplo ili slatko",
+        "Ako vam je pukla ili ispala plomba ili se okrnjio zub",
+        "Ako je potrebno vađenje zuba ili umnjaka",
+      ],
+      en: [
+        "If you have toothache or sensitivity to cold, heat or sweets",
+        "If a filling has cracked or fallen out, or a tooth has chipped",
+        "If a tooth or wisdom tooth needs to come out",
+      ],
+    },
+    steps: {
+      sr: [
+        { t: "Pregled", d: "Utvrđujemo uzrok tegoba i pre početka objašnjavamo moguća rešenja i cenu." },
+        { t: "Anestezija", d: "Kada je potrebno, zub lokalno anesteziramo, a vi u svakom trenutku možete dati znak da zastanemo." },
+        { t: "Lečenje", d: "Uklanjamo karijes i zub popravljamo plombom u boji zuba. Ako je zahvaćen nerv, radi se lečenje kanala korena." },
+        { t: "Kontrola", d: "Proveravamo zagrižaj i dajemo savete za naredne dane. Zub posle lečenja kanala često treba zaštititi nadogradnjom ili krunicom." },
+      ],
+      en: [
+        { t: "Examination", d: "We find the cause of the problem and explain the options and the price before we start." },
+        { t: "Anaesthesia", d: "When needed, the tooth is numbed with local anaesthetic, and you can signal us to pause at any time." },
+        { t: "Treatment", d: "Decay is removed and the tooth is restored with a tooth-coloured filling. If the nerve is affected, root canal treatment is done." },
+        { t: "Follow-up", d: "We check your bite and give advice for the next few days. After a root canal, a tooth often needs a core build-up or a crown." },
+      ],
+    },
     faq: {
       sr: [
         {
@@ -265,6 +452,10 @@ export const categories: Category[] = [
           q: "Šta da radim ako me boli zub?",
           a: "Pozovite nas ili zakažite hitnu intervenciju online. Pacijente sa bolom trudimo se da primimo istog dana.",
         },
+        {
+          q: "Da li je bolje izvaditi ili lečiti zub?",
+          a: "Kad god je moguće, bolje je sačuvati prirodan zub. Vađenje predlažemo tek kada zub ne može pouzdano da se izleči, i tada razgovaramo o tome kako da se nadoknadi.",
+        },
       ],
       en: [
         {
@@ -274,6 +465,10 @@ export const categories: Category[] = [
         {
           q: "What should I do if I have a toothache?",
           a: "Call us or book an emergency visit online. We do our best to see patients in pain the same day.",
+        },
+        {
+          q: "Is it better to extract or to save a tooth?",
+          a: "Whenever possible, it's better to keep your natural tooth. We only suggest an extraction when a tooth can't be reliably saved, and then we discuss how to replace it.",
         },
       ],
     },
@@ -287,6 +482,8 @@ export const categories: Category[] = [
     icon: "crown",
     image: images.toothModel,
     title: { sr: "Protetika", en: "Prosthodontics" },
+    seoTitle: { sr: "Krunice, mostovi i proteze u Batajnici", en: "Crowns, bridges and dentures in Batajnica" },
+    h1: { sr: "Zubne krunice, mostovi i proteze", en: "Crowns, bridges and dentures" },
     short: {
       sr: "Krunice, mostovi i proteze koje vraćaju funkciju, izgled i samopouzdanje.",
       en: "Crowns, bridges and dentures that restore function, looks and confidence.",
@@ -309,6 +506,32 @@ export const categories: Category[] = [
         "Denture repairs and relining",
       ],
     },
+    forWhom: {
+      sr: [
+        "Pacijentima kojima nedostaje jedan ili više zuba",
+        "Kada je zub jako oštećen ili mu je posle lečenja kanala potrebna zaštita",
+        "Nosiocima proteza kojima je proteza postala labava, napukla ili neudobna",
+      ],
+      en: [
+        "Patients missing one or more teeth",
+        "When a tooth is badly damaged or needs protection after a root canal",
+        "Denture wearers whose denture has become loose, cracked or uncomfortable",
+      ],
+    },
+    steps: {
+      sr: [
+        { t: "Pregled i plan", d: "Procenjujemo stanje zuba i desni i predlažemo rešenja, uz prednosti, trajanje i cenu svakog." },
+        { t: "Priprema i otisak", d: "Zubi se pripremaju i uzima se otisak. Do gotovog rada, kada je potrebno, nosite privremeno rešenje." },
+        { t: "Proba", d: "Proveravamo oblik, boju i zagrižaj i po potrebi korigujemo pre konačnog postavljanja." },
+        { t: "Predaja i kontrola", d: "Rad se cementira ili predaje, uz savete za održavanje i kontrolu posle perioda navikavanja." },
+      ],
+      en: [
+        { t: "Assessment and plan", d: "We assess your teeth and gums and suggest options, with the benefits, timeline and price of each." },
+        { t: "Preparation and impressions", d: "The teeth are prepared and impressions are taken. Until the final work is ready, you wear a temporary solution when needed." },
+        { t: "Try-in", d: "We check the shape, shade and bite and make adjustments before the final fitting." },
+        { t: "Fitting and follow-up", d: "The work is cemented or handed over, with care instructions and a check-up after you've got used to it." },
+      ],
+    },
     faq: {
       sr: [
         {
@@ -319,6 +542,10 @@ export const categories: Category[] = [
           q: "Šta je bolje, cirkonijum ili metalokeramika?",
           a: "Cirkonijum izgleda prirodnije i ne sadrži metal, pa je idealan za prednje zube. Metalokeramika je pristupačnija i i dalje odlično rešenje za bočne zube.",
         },
+        {
+          q: "Koliko traju krunice i mostovi?",
+          a: "Uz dobru higijenu i redovne kontrole krunice i mostovi traju dugi niz godina. Trajnost zavisi od materijala, stanja zuba nosača i navika kao što je škrgutanje zubima.",
+        },
       ],
       en: [
         {
@@ -328,6 +555,10 @@ export const categories: Category[] = [
         {
           q: "Which is better, zirconia or porcelain-fused-to-metal?",
           a: "Zirconia looks more natural and contains no metal, which makes it ideal for front teeth. Porcelain-fused-to-metal is more affordable and still an excellent choice for back teeth.",
+        },
+        {
+          q: "How long do crowns and bridges last?",
+          a: "With good hygiene and regular check-ups, crowns and bridges last for many years. How long depends on the material, the supporting teeth and habits such as grinding.",
         },
       ],
     },
@@ -341,6 +572,8 @@ export const categories: Category[] = [
     icon: "implant",
     image: images.implant,
     title: { sr: "Implantologija", en: "Dental implants" },
+    seoTitle: { sr: "Zubni implanti u Batajnici", en: "Dental implants in Batajnica" },
+    h1: { sr: "Zubni implanti", en: "Dental implants" },
     short: {
       sr: "Trajna zamena za izgubljene zube: implant i krunica koji izgledaju i rade kao pravi zub.",
       en: "A permanent replacement for missing teeth: an implant and crown that look and work like a real tooth.",
@@ -363,6 +596,32 @@ export const categories: Category[] = [
         "Patients from abroad: an estimate based on your panoramic X-ray",
       ],
     },
+    forWhom: {
+      sr: [
+        "Odraslima kojima nedostaje jedan ili više zuba",
+        "Nosiocima proteza koji žele stabilnije rešenje",
+        "Onima koji ne žele da se zbog mosta bruse zdravi susedni zubi",
+      ],
+      en: [
+        "Adults missing one or more teeth",
+        "Denture wearers who want a more stable solution",
+        "Anyone who'd rather not have healthy neighbouring teeth ground down for a bridge",
+      ],
+    },
+    steps: {
+      sr: [
+        { t: "Konsultacija", d: "Procenjujemo da li ste kandidat za implant i šta je potrebno pre ugradnje." },
+        { t: "Dijagnostika", d: "Na osnovu snimka, najčešće 3D snimka vilice, planira se položaj implanta." },
+        { t: "Ugradnja", d: "Implant se ugrađuje u lokalnoj anesteziji. Sledi srastanje sa kosti, najčešće od tri do šest meseci." },
+        { t: "Krunica", d: "Kada implant sraste, izrađuje se i postavlja krunica, a zatim se dolazi na redovne kontrole." },
+      ],
+      en: [
+        { t: "Consultation", d: "We assess whether you're a candidate for an implant and what is needed before placement." },
+        { t: "Planning", d: "The implant position is planned from an X-ray, usually a 3D scan of the jaw." },
+        { t: "Placement", d: "The implant is placed under local anaesthetic. It then bonds with the bone, usually over three to six months." },
+        { t: "Crown", d: "Once the implant has healed, the crown is made and fitted, followed by regular check-ups." },
+      ],
+    },
     faq: {
       sr: [
         {
@@ -373,6 +632,10 @@ export const categories: Category[] = [
           q: "Živim u inostranstvu. Mogu li da dobijem procenu unapred?",
           a: "Da. Pošaljite ortopan snimak na WhatsApp ili e-mail i dobićete okvirni plan i cenu pre dolaska.",
         },
+        {
+          q: "Da li svako može da ugradi implant?",
+          a: "Većina odraslih može, ali o tome odlučuje stomatolog posle pregleda i snimka. Na plan terapije utiču količina kosti, opšte zdravlje, pušenje i neke hronične bolesti.",
+        },
       ],
       en: [
         {
@@ -382,6 +645,10 @@ export const categories: Category[] = [
         {
           q: "I live abroad. Can I get an estimate in advance?",
           a: "Yes. Send your panoramic X-ray via WhatsApp or e-mail and you'll receive an outline plan and price before you travel.",
+        },
+        {
+          q: "Can anyone have an implant?",
+          a: "Most adults can, but the dentist decides after an examination and X-ray. Bone volume, general health, smoking and some chronic conditions all affect the plan.",
         },
       ],
     },

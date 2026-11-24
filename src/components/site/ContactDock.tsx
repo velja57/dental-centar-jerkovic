@@ -9,7 +9,7 @@ import { ViberIcon, WhatsAppIcon } from "./BrandIcons";
 export function ContactDock({ locale, t }: { locale: Locale; t: Dict }) {
   return (
     <>
-      <div className="fixed right-5 bottom-5 z-40 hidden flex-col gap-3 md:flex">
+      <div data-area="dock" className="fixed right-5 bottom-5 z-40 hidden flex-col gap-3 md:flex">
         <a
           href={viberLink}
           aria-label={t.floating.viber}
@@ -30,7 +30,7 @@ export function ContactDock({ locale, t }: { locale: Locale; t: Dict }) {
         </a>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden">
+      <div data-area="dock" className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden">
         <div className="grid grid-cols-[1fr_1fr_1.4fr] gap-2">
           <a href={telLink} className="btn btn-outline px-2 py-2.5 text-sm">
             <Phone className="h-4 w-4" />

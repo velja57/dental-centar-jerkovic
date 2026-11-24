@@ -19,6 +19,7 @@ import {
 import { DentalIcon } from "@/components/site/DentalIcon";
 import { WhatsAppIcon } from "@/components/site/BrandIcons";
 import { HoursList } from "@/components/site/HoursList";
+import { JsonLd } from "@/components/site/JsonLd";
 import { MapFacade } from "@/components/site/MapFacade";
 import { Photo } from "@/components/site/Photo";
 import { DoctorAvatar, FaqList, SectionHeading, Stars } from "@/components/site/ui";
@@ -32,6 +33,7 @@ import { getNextAvailable } from "@/lib/availability";
 import { fill, getDict } from "@/lib/dictionaries";
 import { priceParts } from "@/lib/format";
 import { alternates, href, serviceCategoryHref, type Locale } from "@/lib/i18n";
+import { faqJsonLd, websiteJsonLd } from "@/lib/jsonld";
 import { getActiveDoctors, getActiveServices, lowestPrice } from "@/lib/public-data";
 import { doctorTitle } from "@/lib/site";
 import { fmtSlotRelative } from "@/lib/time";
@@ -61,6 +63,7 @@ export default async function HomePage({ params }: Props) {
 
   return (
     <>
+      <JsonLd data={[websiteJsonLd(locale), faqJsonLd(faq)]} />
       {/* ——— HERO ——— */}
       <section className="relative overflow-hidden bg-linear-to-b from-brand-50 via-white to-white">
         <div aria-hidden="true" className="pointer-events-none absolute -top-40 -right-40 h-[36rem] w-[36rem] rounded-full bg-brand-100/60 blur-3xl" />
@@ -97,7 +100,8 @@ export default async function HomePage({ params }: Props) {
                 src={images.hero.src}
                 alt={images.hero.alt[locale]}
                 fill
-                priority
+                loading="eager"
+                fetchPriority="high"
                 sizes="(min-width: 1024px) 42vw, (min-width: 640px) 28rem, 92vw"
                 className="object-cover"
               />
@@ -334,9 +338,12 @@ export default async function HomePage({ params }: Props) {
               </figure>
             ))}
           </div>
-          <div className="mt-10 text-center">
+          <div className="mt-10 flex flex-col items-center gap-4">
             <a href={clinic.google.reviewsUrl} target="_blank" rel="noopener" className="btn btn-outline">
               {t.reviewsSection.cta} <ArrowRight className="h-4 w-4" />
+            </a>
+            <a href={clinic.google.writeReviewUrl} target="_blank" rel="noopener" className="text-sm font-semibold text-slate-500 underline-offset-4 hover:text-brand-700 hover:underline">
+              {t.reviewsSection.write}
             </a>
           </div>
         </div>
@@ -440,7 +447,7 @@ export default async function HomePage({ params }: Props) {
       {/* ——— LOKACIJA ——— */}
       <section className="py-20 md:py-28">
         <div className="container-page">
-          <SectionHeading eyebrow={t.location.eyebrow} title={t.location.title} subtitle={t.location.subtitle} />
+          <SectionHeading eyebrow={t.location.eyebrow} title={t.location.title} subtitle={fill(t.location.subtitle, { nearby: clinic.nearby[locale] })} />
           <div className="mt-12 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
             <MapFacade embedUrl={mapsEmbedUrl} title={clinic.mapsQuery} buttonLabel={t.common.showMap} note={t.common.mapNote} />
             <div className="card p-7">
@@ -450,9 +457,14 @@ export default async function HomePage({ params }: Props) {
               <p className="mt-2 text-[15px] text-slate-700">
                 {clinic.address.street}, {clinic.address.postalCode} {clinic.address.city}, {clinic.address.region}
               </p>
-              <a href={mapsDirectionsUrl} target="_blank" rel="noopener" className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-brand-700">
-                {t.common.directions} <ArrowRight className="h-4 w-4" />
-              </a>
+              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+                <a href={mapsDirectionsUrl} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-700">
+                  {t.common.directions} <ArrowRight className="h-4 w-4" />
+                </a>
+                <a href={clinic.google.reviewsUrl} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-700">
+                  {t.common.openInMaps} <ArrowRight className="h-4 w-4" />
+                </a>
+              </div>
               <h3 className="mt-7 flex items-center gap-2 text-lg font-bold text-ink">
                 <Clock className="h-5 w-5 text-brand-600" /> {t.common.hours}
               </h3>

@@ -17,7 +17,7 @@ type Props = { params: Promise<{ locale: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const t = getDict(locale);
-  return { title: t.servicesPage.title, description: t.servicesPage.subtitle, alternates: alternates(locale, "services") };
+  return { title: t.servicesPage.metaTitle, description: t.servicesPage.subtitle, alternates: alternates(locale, "services") };
 }
 
 export default async function ServicesPage({ params }: Props) {
@@ -28,7 +28,7 @@ export default async function ServicesPage({ params }: Props) {
 
   return (
     <>
-      <PageHero eyebrow={t.servicesSection.eyebrow} title={t.servicesPage.title} subtitle={t.servicesPage.subtitle} />
+      <PageHero eyebrow={t.servicesSection.eyebrow} title={t.servicesPage.heading} subtitle={t.servicesPage.subtitle} />
       <section className="pb-20 md:pb-28">
         <div className="container-page grid gap-8 md:grid-cols-2">
           {categories.map((cat) => {

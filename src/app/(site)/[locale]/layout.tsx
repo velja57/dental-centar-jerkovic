@@ -5,6 +5,8 @@ import "../../globals.css";
 import { ContactDock } from "@/components/site/ContactDock";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
+import { JsonLd } from "@/components/site/JsonLd";
+import { SiteAnalytics } from "@/components/site/SiteAnalytics";
 import { clinic } from "@/content/clinic";
 import { images } from "@/content/images";
 import { getDict } from "@/lib/dictionaries";
@@ -37,6 +39,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       images: [{ url: `${images.familyThree.src}?auto=format&fit=crop&w=1200&h=630&q=70`, width: 1200, height: 630, alt: images.familyThree.alt[loc] }],
     },
     twitter: { card: "summary_large_image" },
+    // Google Search Console (svojstvo „URL prefix“): kod iz GSC → Vercel env GOOGLE_SITE_VERIFICATION
+    ...(process.env.GOOGLE_SITE_VERIFICATION ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } } : {}),
   };
 }
 
@@ -62,7 +66,8 @@ export default async function SiteLayout({ children, params }: Props) {
         <main id="main">{children}</main>
         <Footer locale={locale} t={t} />
         <ContactDock locale={locale} t={t} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(dentistJsonLd(locale)) }} />
+        <JsonLd data={dentistJsonLd(locale)} />
+        <SiteAnalytics />
       </body>
     </html>
   );

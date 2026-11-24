@@ -1,5 +1,38 @@
 import { clinic } from "./clinic";
 
+// Radno vreme rečenicom, iz clinic.hours (da odgovor nikad ne odstupa od tabele radnog vremena).
+const DAYS = {
+  sr: ["nedeljom", "ponedeljkom", "utorkom", "sredom", "četvrtkom", "petkom", "subotom"],
+  en: ["Sundays", "Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays"],
+};
+const WEEK = [1, 2, 3, 4, 5, 6, 0];
+const hm = (t: string) => t.replace(/^0/, "");
+
+function joinList(items: string[], and: string) {
+  return items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} ${and} ${items[items.length - 1]}`;
+}
+
+function hoursAnswer(loc: "sr" | "en") {
+  const groups: { open: string; close: string; days: number[] }[] = [];
+  for (const wd of WEEK) {
+    const h = clinic.hours.find((x) => x.weekday === wd);
+    if (!h) continue;
+    const g = groups.find((x) => x.open === h.open && x.close === h.close);
+    if (g) g.days.push(wd);
+    else groups.push({ open: h.open, close: h.close, days: [wd] });
+  }
+  const closed = WEEK.filter((wd) => !clinic.hours.some((x) => x.weekday === wd));
+  if (loc === "sr") {
+    const open = groups.map((g) => `${joinList(g.days.map((d) => DAYS.sr[d]), "i")} od ${hm(g.open)} do ${hm(g.close)}`).join(", a ");
+    const offList = joinList(closed.map((d) => DAYS.sr[d]), "i");
+    const off = closed.length ? ` ${offList.charAt(0).toUpperCase()}${offList.slice(1)} ne radimo.` : "";
+    return `Radimo ${open}.${off} Termin možete zakazati online u bilo koje doba.`;
+  }
+  const open = groups.map((g) => `${joinList(g.days.map((d) => DAYS.en[d]), "and")} from ${hm(g.open)} to ${hm(g.close)}`).join(", and ");
+  const off = closed.length ? ` We're closed on ${joinList(closed.map((d) => DAYS.en[d]), "and")}.` : "";
+  return `We're open ${open}.${off} You can book online at any time.`;
+}
+
 export const generalFaq = {
   sr: [
     {
@@ -25,6 +58,10 @@ export const generalFaq = {
     {
       q: "Da li primate hitne slučajeve?",
       a: `Da. Pozovite nas na ${clinic.phoneDisplay} ili zakažite hitnu intervenciju online. Pacijente sa bolom trudimo se da primimo istog dana.`,
+    },
+    {
+      q: "Kakvo je radno vreme ordinacije?",
+      a: hoursAnswer("sr"),
     },
     {
       q: "Gde se nalazite?",
@@ -55,6 +92,10 @@ export const generalFaq = {
     {
       q: "Do you take emergencies?",
       a: `Yes. Call us on ${clinic.phoneE164} or book an emergency visit online. We do our best to see patients in pain the same day.`,
+    },
+    {
+      q: "What are your opening hours?",
+      a: hoursAnswer("en"),
     },
     {
       q: "Where are you located?",

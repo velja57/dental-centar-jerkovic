@@ -6,7 +6,7 @@ import { HoursList } from "@/components/site/HoursList";
 import { MapFacade } from "@/components/site/MapFacade";
 import { PageHero } from "@/components/site/ui";
 import { clinic, mapsDirectionsUrl, mapsEmbedUrl, telLink, viberLink, waLink } from "@/content/clinic";
-import { getDict } from "@/lib/dictionaries";
+import { fill, getDict } from "@/lib/dictionaries";
 import { alternates, href, type Locale } from "@/lib/i18n";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -14,7 +14,13 @@ type Props = { params: Promise<{ locale: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const t = getDict(locale);
-  return { title: t.contactPage.title, description: t.contactPage.subtitle, alternates: alternates(locale, "contact") };
+  const description = fill(t.contactPage.metaDescription, {
+    name: clinic.name,
+    street: clinic.address.street,
+    postal: clinic.address.postalCode,
+    phone: clinic.phoneDisplay,
+  });
+  return { title: t.contactPage.metaTitle, description, alternates: alternates(locale, "contact") };
 }
 
 export default async function ContactPage({ params }: Props) {
@@ -68,9 +74,14 @@ export default async function ContactPage({ params }: Props) {
                 {clinic.address.postalCode} {clinic.address.city}, {clinic.address.region}
               </span>
             </p>
-            <a href={mapsDirectionsUrl} target="_blank" rel="noopener" className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-brand-700">
-              {t.common.directions} <ArrowRight className="h-4 w-4" />
-            </a>
+            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+              <a href={mapsDirectionsUrl} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-700">
+                {t.common.directions} <ArrowRight className="h-4 w-4" />
+              </a>
+              <a href={clinic.google.reviewsUrl} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-700">
+                {t.common.openInMaps} <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
             <h3 className="mt-8 flex items-center gap-2 text-lg font-bold text-ink">
               <Clock className="h-5 w-5 text-brand-600" /> {t.common.hours}
             </h3>

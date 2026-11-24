@@ -25,9 +25,11 @@ export async function runDailyJobs() {
     await db.update(appointments).set({ reminderSentAt: iso }).where(eq(appointments.id, a.id));
   }
 
-  // 2) Molba za recenziju (termini završeni juče ili danas)
+  // 2) Molba za recenziju (termini završeni juče ili danas) — svim pacijentima, bez biranja „zadovoljnih“
+  //    (Google pravila), ali najviše jednom u 12 meseci po pacijentu: pacijent na terapiji
+  //    (npr. mesečne kontrole aparatića) ne dobija molbu posle svake posete.
   const done = await db
-    .select({ id: appointments.id })
+    .select({ id: appointments.id, patientId: appointments.patientId })
     .from(appointments)
     .where(
       and(
@@ -37,9 +39,21 @@ export async function runDailyJobs() {
         isNull(appointments.reviewRequestSentAt),
       ),
     );
+  const yearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString();
+  const asked = new Set<number>();
+  let reviewRequests = 0;
   for (const a of done) {
+    if (asked.has(a.patientId)) continue;
+    asked.add(a.patientId);
+    const [recent] = await db
+      .select({ id: appointments.id })
+      .from(appointments)
+      .where(and(eq(appointments.patientId, a.patientId), gte(appointments.reviewRequestSentAt, yearAgo)))
+      .limit(1);
+    if (recent) continue;
     await notifyAppointment(a.id, "review_request");
     await db.update(appointments).set({ reviewRequestSentAt: iso }).where(eq(appointments.id, a.id));
+    reviewRequests++;
   }
 
   // 3) Poziv na kontrolu: poslednja poseta pre ~6 meseci, nema zakazanih termina
@@ -73,5 +87,5 @@ export async function runDailyJobs() {
     recalls++;
   }
 
-  return { reminders: due.length, reviewRequests: done.length, recalls };
+  return { reminders: due.length, reviewRequests, recalls };
 }

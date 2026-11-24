@@ -16,7 +16,7 @@ type Props = { params: Promise<{ locale: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const t = getDict(locale);
-  return { title: t.pricesPage.title, description: t.pricesPage.subtitle, alternates: alternates(locale, "prices") };
+  return { title: t.pricesPage.metaTitle, description: t.pricesPage.subtitle, alternates: alternates(locale, "prices") };
 }
 
 export default async function PricesPage({ params }: Props) {

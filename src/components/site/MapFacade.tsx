@@ -21,6 +21,7 @@ export function MapFacade({ embedUrl, title, buttonLabel, note }: { embedUrl: st
   return (
     <button
       type="button"
+      data-track="map_open"
       onClick={() => setShow(true)}
       className="group relative flex h-full min-h-80 w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-3xl border border-brand-100 bg-brand-50 text-center"
     >

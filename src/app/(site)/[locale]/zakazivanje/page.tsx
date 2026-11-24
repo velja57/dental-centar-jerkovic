@@ -20,7 +20,7 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const t = getDict(locale);
-  return { title: t.booking.title, description: t.booking.subtitle, alternates: alternates(locale, "booking") };
+  return { title: t.booking.title, description: t.booking.metaDescription, alternates: alternates(locale, "booking") };
 }
 
 export default async function BookingPage({ params, searchParams }: Props) {

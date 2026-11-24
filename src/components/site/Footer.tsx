@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { clinic, mapsDirectionsUrl, telLink } from "@/content/clinic";
+import { categories } from "@/content/services";
 import type { Dict } from "@/lib/dictionaries";
-import { href, type Locale } from "@/lib/i18n";
+import { href, serviceCategoryHref, type Locale } from "@/lib/i18n";
+import { InstagramIcon } from "./BrandIcons";
 import { HoursList } from "./HoursList";
 import { Logo } from "./Logo";
 
@@ -16,7 +18,7 @@ export function Footer({ locale, t }: { locale: Locale; t: Dict }) {
   ];
   return (
     <footer className="bg-brand-950 text-brand-100">
-      <div className="container-page grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-[1.3fr_0.8fr_1fr_1fr]">
+      <div className="container-page grid gap-10 py-14 md:grid-cols-2 lg:grid-cols-[1.25fr_0.75fr_1fr_1.1fr_1fr]">
         <div>
           <Logo light />
           <p className="mt-4 max-w-xs text-[15px] leading-relaxed text-brand-100/75">{t.footer.tagline}</p>
@@ -31,6 +33,18 @@ export function Footer({ locale, t }: { locale: Locale; t: Dict }) {
               <li key={l.href}>
                 <Link href={l.href} className="text-brand-100/80 hover:text-white">
                   {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h2 className="text-sm font-bold tracking-wider text-white uppercase">{t.nav.services}</h2>
+          <ul className="mt-4 grid gap-2.5 text-[15px]">
+            {categories.map((c) => (
+              <li key={c.key}>
+                <Link href={serviceCategoryHref(locale, c.key)} className="text-brand-100/80 hover:text-white">
+                  {c.title[locale]}
                 </Link>
               </li>
             ))}
@@ -61,6 +75,14 @@ export function Footer({ locale, t }: { locale: Locale; t: Dict }) {
                 {clinic.email}
               </a>
             </li>
+            {clinic.social.instagram && (
+              <li>
+                <a href={clinic.social.instagram} target="_blank" rel="noopener" className="flex items-center gap-2.5 text-brand-100/80 hover:text-white">
+                  <InstagramIcon className="h-4 w-4 shrink-0 text-brand-300" />
+                  {t.footer.follow}
+                </a>
+              </li>
+            )}
           </ul>
         </div>
         <div>

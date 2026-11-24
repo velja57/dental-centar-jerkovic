@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { DentalIcon } from "@/components/site/DentalIcon";
 import type { DentalIconName } from "@/content/services";
+import { track } from "@/lib/analytics";
 import { createBooking } from "@/lib/booking-actions";
 import { googleCalendarUrl } from "@/lib/calendar-links";
 import type { Dict } from "@/lib/dictionaries";
@@ -156,6 +157,8 @@ export function BookingWizard(props: Props) {
     setSubmitting(false);
     if (res.ok) {
       setResult({ token: res.token, status: res.status, doctorId: res.doctorId });
+      // Jednom po uspešnom zakazivanju; bez ličnih podataka i bez konkretne usluge (samo oblast).
+      track("booking_completed", { mode: res.status === "confirmed" ? "instant" : "request", category: service.category });
       go(3);
       return;
     }

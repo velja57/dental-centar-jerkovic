@@ -2,9 +2,9 @@ import type { Locale } from "./i18n";
 
 const sr = {
   meta: {
-    siteTitle: "Dental Centar Jerković | Stomatolog Batajnica",
+    siteTitle: "Stomatolog i zubar u Batajnici | Dental Centar Jerković",
     siteDescription:
-      "Dečja stomatologija, ortodoncija i protetika na jednom mestu u Batajnici. Zakažite termin online za minut i odmah dobijte potvrdu. Prva konsultacija je besplatna.",
+      "Privatna stomatološka ordinacija u Batajnici, Stevana Dubajića 53: dečji stomatolog, ortodont i protetičar. Besplatan prvi pregled i online zakazivanje.",
   },
   nav: {
     home: "Početna",
@@ -30,6 +30,7 @@ const sr = {
     request: "Na upit",
     closed: "Ne radimo",
     directions: "Uputstvo za dolazak",
+    openInMaps: "Otvori na Google mapama",
     showMap: "Prikaži mapu",
     mapNote: "Mapa se učitava sa Google Maps tek kada kliknete.",
     phone: "Telefon",
@@ -40,8 +41,8 @@ const sr = {
     viewPrices: "Ceo cenovnik",
   },
   hero: {
-    eyebrow: "Stomatološka ordinacija u Batajnici",
-    titleA: "Zdrav osmeh za celu porodicu,",
+    eyebrow: "Stevana Dubajića 53, Batajnica",
+    titleA: "Stomatolog u Batajnici za celu porodicu,",
     titleB: "bez straha i čekanja",
     subtitle:
       "Dečja stomatologija, ortodoncija i protetika na jednom mestu. Zakažite termin online za minut i odmah dobijte potvrdu.",
@@ -102,6 +103,7 @@ const sr = {
     subtitle: "Prosečna ocena {rating} na Google-u, na osnovu {count} recenzija.",
     cta: "Sve recenzije na Google-u",
     source: "Google recenzija",
+    write: "Bili ste kod nas? Ostavite recenziju na Google-u",
   },
   pricesSection: {
     eyebrow: "Cene",
@@ -132,8 +134,8 @@ const sr = {
   },
   location: {
     eyebrow: "Lokacija",
-    title: "Lako nas je pronaći",
-    subtitle: "Batajnica, Beograd, nadomak Zemun Polja i Nove Pazove.",
+    title: "Stomatološka ordinacija u Batajnici",
+    subtitle: "Stevana Dubajića 53, Batajnica. Lako nam je doći i iz {nearby}.",
   },
   ctaBand: {
     title: "Vaš novi osmeh je na klik od vas",
@@ -142,17 +144,25 @@ const sr = {
   },
   servicesPage: {
     title: "Usluge",
+    heading: "Stomatološke usluge",
+    metaTitle: "Stomatološke usluge u Batajnici",
     subtitle: "Sve oblasti stomatologije za decu i odrasle na jednom mestu: od prevencije do novog osmeha.",
     priceList: "Cene i trajanje",
     book: "Zakaži",
     benefitsTitle: "Šta dobijate",
+    forWhomTitle: "Kome je namenjeno",
+    processTitle: "Kako izgleda postupak",
+    doctorsTitle: "Ko vas leči",
     faqTitle: "Česta pitanja",
     otherTitle: "Ostale usluge",
     priceNote: "Cene su okvirne. Tačnu cenu dobijate posle pregleda, pre početka terapije.",
     bookCategory: "Zakaži termin",
+    localTitle: "Ordinacija u Batajnici",
+    localText: "Nalazimo se u ulici {street} u Batajnici. Lako nam je doći i iz {nearby}.",
   },
   pricesPage: {
-    title: "Cenovnik",
+    title: "Cenovnik stomatoloških usluga",
+    metaTitle: "Cenovnik stomatoloških usluga u Batajnici",
     subtitle:
       "Okvirne cene stomatoloških usluga u dinarima. Konačna cena zavisi od stanja i obima rada i uvek je znate pre početka terapije.",
     service: "Usluga",
@@ -162,12 +172,16 @@ const sr = {
   },
   teamPage: {
     title: "Naš tim",
+    metaTitle: "Naš tim: ortodont, dečji stomatolog i protetičar",
     subtitle: "Tri oblasti stomatologije, jedan tim. Upoznajte ljude koji brinu o vašem osmehu.",
     bookWith: "Zakaži termin",
     focus: "Oblasti rada",
   },
   contactPage: {
     title: "Kontakt",
+    metaTitle: "Kontakt i lokacija ordinacije u Batajnici",
+    metaDescription:
+      "{name}, {street}, {postal} Batajnica (Beograd). Telefon {phone}, WhatsApp i Viber, radno vreme i uputstvo za dolazak.",
     subtitle: "Tu smo za sva pitanja: pozovite, pišite ili zakažite online.",
     channels: "Kako da nas kontaktirate",
     writeWhatsApp: "Pišite na WhatsApp",
@@ -177,6 +191,8 @@ const sr = {
   },
   booking: {
     title: "Zakažite termin online",
+    metaDescription:
+      "Zakažite pregled kod stomatologa u Batajnici online: izaberite uslugu, doktora i slobodan termin, a potvrda stiže odmah.",
     subtitle: "Izaberite uslugu i slobodan termin. Potvrdu dobijate odmah.",
     steps: ["Usluga", "Termin", "Vaši podaci"],
     popular: "Najčešće zakazivano",
@@ -298,6 +314,7 @@ const sr = {
     privacy: "Politika privatnosti",
     staff: "Prijava za osoblje",
     photos: "Fotografije: Unsplash (privremeno)",
+    follow: "Pratite nas na Instagramu",
   },
   floating: {
     whatsapp: "Pišite nam na WhatsApp",
@@ -314,9 +331,9 @@ export type Dict = typeof sr;
 
 const en: Dict = {
   meta: {
-    siteTitle: "Dental Centar Jerković | Dentist in Batajnica, Belgrade",
+    siteTitle: "Dentist in Batajnica, Belgrade | Dental Centar Jerković",
     siteDescription:
-      "Pediatric dentistry, orthodontics and prosthodontics under one roof in Batajnica, Belgrade. Book online in a minute with instant confirmation. Your first consultation is free.",
+      "Private dental clinic in Batajnica, Belgrade: pediatric dentist, orthodontist and prosthodontist. Free first check-up and instant online booking.",
   },
   nav: {
     home: "Home",
@@ -342,6 +359,7 @@ const en: Dict = {
     request: "On request",
     closed: "Closed",
     directions: "Get directions",
+    openInMaps: "Open in Google Maps",
     showMap: "Show map",
     mapNote: "The map loads from Google Maps only when you click.",
     phone: "Phone",
@@ -352,8 +370,8 @@ const en: Dict = {
     viewPrices: "Full price list",
   },
   hero: {
-    eyebrow: "Dental clinic in Batajnica, Belgrade",
-    titleA: "A healthy smile for the whole family,",
+    eyebrow: "Stevana Dubajića 53, Batajnica, Belgrade",
+    titleA: "Family dentist in Batajnica,",
     titleB: "without fear or waiting",
     subtitle:
       "Pediatric dentistry, orthodontics and prosthodontics under one roof. Book online in a minute and get instant confirmation.",
@@ -414,6 +432,7 @@ const en: Dict = {
     subtitle: "Average rating of {rating} on Google, based on {count} reviews.",
     cta: "All reviews on Google",
     source: "Google review",
+    write: "Been to see us? Leave a Google review",
   },
   pricesSection: {
     eyebrow: "Prices",
@@ -444,8 +463,8 @@ const en: Dict = {
   },
   location: {
     eyebrow: "Location",
-    title: "Easy to find",
-    subtitle: "Batajnica, Belgrade, close to Zemun Polje and Nova Pazova.",
+    title: "Our dental clinic in Batajnica",
+    subtitle: "Stevana Dubajića 53, Batajnica, Belgrade. Easy to reach from {nearby} too.",
   },
   ctaBand: {
     title: "Your new smile is one click away",
@@ -454,17 +473,25 @@ const en: Dict = {
   },
   servicesPage: {
     title: "Services",
+    heading: "Dental services",
+    metaTitle: "Dental services in Batajnica, Belgrade",
     subtitle: "Every field of dentistry for children and adults in one place, from prevention to a brand-new smile.",
     priceList: "Prices and duration",
     book: "Book",
     benefitsTitle: "What you get",
+    forWhomTitle: "Who it's for",
+    processTitle: "What to expect",
+    doctorsTitle: "Your dentist",
     faqTitle: "Frequently asked questions",
     otherTitle: "Other services",
     priceNote: "Prices are guide prices. You get an exact quote after the check-up, before any treatment starts.",
     bookCategory: "Book an appointment",
+    localTitle: "Our clinic in Batajnica",
+    localText: "You'll find us at {street} in Batajnica, Belgrade. We're also easy to reach from {nearby}.",
   },
   pricesPage: {
-    title: "Prices",
+    title: "Dental price list",
+    metaTitle: "Dental prices in Batajnica, Belgrade",
     subtitle:
       "Guide prices for our dental services in Serbian dinars (RSD), with approximate euro amounts. The final price depends on your case and is always agreed before treatment.",
     service: "Service",
@@ -474,12 +501,15 @@ const en: Dict = {
   },
   teamPage: {
     title: "Our team",
+    metaTitle: "Our dentists in Batajnica, Belgrade",
     subtitle: "Three fields of dentistry, one team. Meet the people who look after your smile.",
     bookWith: "Book an appointment",
     focus: "Areas of focus",
   },
   contactPage: {
     title: "Contact",
+    metaTitle: "Contact us – dental clinic in Batajnica",
+    metaDescription: "{name}, {street}, {postal} Batajnica, Belgrade. Phone {phone}, WhatsApp and Viber, opening hours and directions.",
     subtitle: "We're here for any question: call, message or book online.",
     channels: "How to reach us",
     writeWhatsApp: "Message on WhatsApp",
@@ -489,6 +519,8 @@ const en: Dict = {
   },
   booking: {
     title: "Book an appointment online",
+    metaDescription:
+      "Book a dental appointment in Batajnica, Belgrade online: choose a service, a dentist and a free time slot, with instant confirmation.",
     subtitle: "Choose a service and an available time. You get confirmation instantly.",
     steps: ["Service", "Time", "Your details"],
     popular: "Most booked",
@@ -610,6 +642,7 @@ const en: Dict = {
     privacy: "Privacy policy",
     staff: "Staff login",
     photos: "Photos: Unsplash (temporary)",
+    follow: "Follow us on Instagram",
   },
   floating: {
     whatsapp: "Message us on WhatsApp",

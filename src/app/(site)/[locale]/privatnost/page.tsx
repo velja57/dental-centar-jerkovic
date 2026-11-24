@@ -42,6 +42,10 @@ const content = {
         p: "Imate pravo na pristup, ispravku i brisanje podataka, ograničenje obrade, prenosivost i prigovor, kao i pravo na pritužbu Povereniku za informacije od javnog značaja i zaštitu podataka o ličnosti.",
       },
       {
+        h: "Merenje posećenosti",
+        p: "Da bismo znali koje stranice su korisne i koliko ljudi nas pozove ili zakaže termin preko sajta, koristimo Vercel Web Analytics. On ne koristi kolačiće i ne prepoznaje vas lično: beleži samo zbirne podatke (posećena stranica, vrsta uređaja, zemlja) i klikove kao što su „poziv“ ili „zakazan termin“, bez vašeg imena, telefona, e-maila i podataka o zdravlju.",
+      },
+      {
         h: "Kolačići",
         p: "Sajt ne koristi kolačiće za praćenje ili oglašavanje. Mapa sa Google Maps učitava se samo kada kliknete na nju.",
       },
@@ -78,6 +82,10 @@ const content = {
       {
         h: "Your rights",
         p: "You have the right to access, correct and erase your data, restrict processing, data portability and to object, as well as to lodge a complaint with the Serbian Commissioner for Information of Public Importance and Personal Data Protection.",
+      },
+      {
+        h: "Visitor statistics",
+        p: "To learn which pages are useful and how many people call us or book through the website, we use Vercel Web Analytics. It uses no cookies and does not identify you: it records only aggregate data (page visited, device type, country) and clicks such as “call” or “appointment booked”, never your name, phone number, e-mail or health information.",
       },
       {
         h: "Cookies",

@@ -15,7 +15,7 @@ type Props = { params: Promise<{ locale: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const t = getDict(locale);
-  return { title: t.teamPage.title, description: t.teamPage.subtitle, alternates: alternates(locale, "team") };
+  return { title: t.teamPage.metaTitle, description: t.teamPage.subtitle, alternates: alternates(locale, "team") };
 }
 
 export default async function TeamPage({ params }: Props) {
@@ -31,7 +31,7 @@ export default async function TeamPage({ params }: Props) {
           {docs.map((d) => {
             const c = teamContent(d.slug);
             return (
-              <article key={d.id} className="card flex flex-col p-8">
+              <article key={d.id} id={d.slug} className="card flex scroll-mt-24 flex-col p-8">
                 <div className="flex items-center gap-5">
                   <DoctorAvatar name={d.name} color={d.color} size="md" />
                   <div>
