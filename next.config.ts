@@ -13,9 +13,11 @@ const securityHeaders = [
 ];
 
 // Admin i stranice termina (link sa tajnim kodom): nikad u Google-u, i bez slanja adrese drugim sajtovima.
+// "same-origin", a ne "no-referrer": uz "no-referrer" pregledač šalje formulare (pre nego što se
+// JavaScript učita) sa „Origin: null“, pa ih Next.js zaštita odbija i korisnik dobija grešku.
 const privateHeaders = [
   { key: "X-Robots-Tag", value: "noindex, nofollow" },
-  { key: "Referrer-Policy", value: "no-referrer" },
+  { key: "Referrer-Policy", value: "same-origin" },
 ];
 
 const nextConfig: NextConfig = {

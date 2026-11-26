@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   CalendarCheck,
@@ -102,12 +102,73 @@ export function BookingWizard(props: Props) {
   const service = services.find((s) => s.id === serviceId) ?? null;
   const serviceDoctors = service ? doctors.filter((d) => service.doctorIds.includes(d.id)) : [];
   const chosenDoctor = doctors.find((d) => d.id === (result?.doctorId ?? doctorId)) ?? null;
+  const noticeRef = useRef<HTMLDivElement>(null);
+  const [focusField, setFocusField] = useState<{ id: string } | null>(null); // novi objekat = ponovni fokus
+
+  useEffect(() => {
+    if (!focusField) return;
+    const el = document.getElementById(focusField.id);
+    el?.focus({ preventScroll: true });
+    el?.scrollIntoView({ block: "center" }); // odmah, bez animacije: greška mora odmah da se vidi
+  }, [focusField]);
 
   function go(next: number) {
     setStep(next);
     setNotice(null);
     requestAnimationFrame(() => rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
   }
+
+  // Poruka posle slanja (npr. „previše termina“) stoji na vrhu, a pacijent je kod dugmeta na dnu:
+  // na telefonu je ne bi video, pa je dovodimo u vidno polje.
+  useEffect(() => {
+    if (notice) noticeRef.current?.scrollIntoView({ block: "center" });
+  }, [notice]);
+
+  // ——— Dugme „Nazad“ (telefon/pregledač) vraća na prethodni korak, umesto da napusti zakazivanje ———
+  // Dok je pacijent dalje od početnog koraka, u istoriji držimo jedan dodatni unos (ista adresa).
+  // „Nazad“ ga skida, a mi umesto napuštanja stranice prikazujemo prethodni korak.
+  const baseStep = initial.serviceId ? 1 : 0;
+  const stepRef = useRef(step);
+  const guardRef = useRef(false);
+  const ignorePopRef = useRef(false);
+  stepRef.current = step;
+
+  useEffect(() => {
+    if (step > baseStep && !guardRef.current) {
+      window.history.pushState(null, "", window.location.href);
+      guardRef.current = true;
+    } else if (step <= baseStep && guardRef.current) {
+      // Vratio se dugmetima na stranici: skidamo dodatni unos, da sledeće „Nazad“ odmah napusti stranicu
+      guardRef.current = false;
+      ignorePopRef.current = true;
+      window.history.back();
+    }
+  }, [step, baseStep]);
+
+  useEffect(() => {
+    function onPop() {
+      if (ignorePopRef.current) {
+        ignorePopRef.current = false;
+        return;
+      }
+      if (!guardRef.current) return; // nije naš unos: pregledač napušta stranicu kao i obično
+      guardRef.current = false;
+      const current = stepRef.current;
+      if (current >= 3) {
+        // Posle uspešnog zakazivanja „Nazad“ ne vraća na popunjen formular (da se termin ne zakaže dvaput)
+        setResult(null);
+        setSlot(null);
+        setPrefDates([]);
+        if (!initial.serviceId) setServiceId(null);
+        go(baseStep);
+      } else if (current > baseStep) {
+        go(current - 1);
+      }
+    }
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function chooseService(s: WService) {
     setServiceId(s.id);
@@ -134,7 +195,11 @@ export function BookingWizard(props: Props) {
     if (!EMAIL_RE.test(form.email.trim())) e.email = t.errors.email;
     if (!form.consent) e.consent = t.errors.consent;
     setErrors(e);
-    return Object.keys(e).length === 0;
+    // Na telefonu je polje sa greškom često iznad ekrana (dugme je na dnu), pa izgleda kao da se ništa
+    // nije desilo: fokusiramo prvo pogrešno polje i dovodimo ga na sredinu ekrana (vidi efekat ispod).
+    const first = ["fullName", "guardianName", "phone", "email", "consent"].find((k) => e[k]);
+    if (first) setFocusField({ id: first });
+    return !first;
   }
 
   async function submit(ev: React.FormEvent) {
@@ -347,7 +412,7 @@ export function BookingWizard(props: Props) {
       </ol>
 
       {notice && (
-        <div role="alert" className="mb-6 flex items-start gap-3 rounded-2xl bg-amber-50 p-4 text-[15px] text-amber-900">
+        <div ref={noticeRef} role="alert" className="mb-6 flex scroll-mt-24 items-start gap-3 rounded-2xl bg-amber-50 p-4 text-[15px] text-amber-900">
           <Info className="mt-0.5 h-5 w-5 shrink-0" /> {notice}
         </div>
       )}
@@ -594,6 +659,7 @@ export function BookingWizard(props: Props) {
                   value={form.fullName}
                   onChange={(e) => set("fullName", e.target.value)}
                   aria-invalid={!!errors.fullName}
+                  aria-describedby={errors.fullName ? "fullName-error" : undefined}
                 />
               </Field>
               {form.forChild && (
@@ -605,6 +671,7 @@ export function BookingWizard(props: Props) {
                     value={form.guardianName}
                     onChange={(e) => set("guardianName", e.target.value)}
                     aria-invalid={!!errors.guardianName}
+                    aria-describedby={errors.guardianName ? "guardianName-error" : undefined}
                   />
                 </Field>
               )}
@@ -619,6 +686,7 @@ export function BookingWizard(props: Props) {
                   value={form.phone}
                   onChange={(e) => set("phone", e.target.value)}
                   aria-invalid={!!errors.phone}
+                  aria-describedby={errors.phone ? "phone-error" : "phone-hint"}
                 />
               </Field>
               <Field id="email" label={t.email} hint={t.emailHint} error={errors.email}>
@@ -631,6 +699,7 @@ export function BookingWizard(props: Props) {
                   value={form.email}
                   onChange={(e) => set("email", e.target.value)}
                   aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? "email-error" : "email-hint"}
                 />
               </Field>
               <Field id="note" label={t.note} className="sm:col-span-2">
@@ -653,11 +722,13 @@ export function BookingWizard(props: Props) {
 
             <label className="mt-6 flex items-start gap-3 text-sm text-slate-600">
               <input
+                id="consent"
                 type="checkbox"
                 className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 accent-brand-600"
                 checked={form.consent}
                 onChange={(e) => set("consent", e.target.checked)}
                 aria-invalid={!!errors.consent}
+                aria-describedby={errors.consent ? "consent-error" : undefined}
               />
               <span>
                 {t.consent}{" "}
@@ -667,7 +738,11 @@ export function BookingWizard(props: Props) {
                 .
               </span>
             </label>
-            {errors.consent && <p className="mt-2 text-sm font-semibold text-red-600">{errors.consent}</p>}
+            {errors.consent && (
+              <p id="consent-error" className="mt-2 text-sm font-semibold text-red-600">
+                {errors.consent}
+              </p>
+            )}
 
             <button type="submit" disabled={submitting} className="btn btn-primary btn-lg mt-7 w-full sm:w-auto">
               {submitting ? (
@@ -782,7 +857,15 @@ function Field({
         {label}
       </label>
       {children}
-      {error ? <p className="mt-1.5 text-sm font-semibold text-red-600">{error}</p> : hint ? <p className="mt-1.5 text-xs text-slate-500">{hint}</p> : null}
+      {error ? (
+        <p id={`${id}-error`} className="mt-1.5 text-sm font-semibold text-red-600">
+          {error}
+        </p>
+      ) : hint ? (
+        <p id={`${id}-hint`} className="mt-1.5 text-xs text-slate-500">
+          {hint}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -65,7 +65,7 @@ export async function loginAction(_prev: FormState, fd: FormData): Promise<FormS
     await new Promise((r) => setTimeout(r, 600));
     return { error: "Pogrešno korisničko ime ili lozinka." };
   }
-  await startSession(d.id);
+  await startSession(d.id, d.passwordHash);
   redirect("/admin");
 }
 
@@ -83,8 +83,11 @@ export async function changePasswordAction(_prev: FormState, fd: FormData): Prom
   if (!d || !verifyPassword(current, d.passwordHash)) return { error: "Trenutna lozinka nije tačna." };
   if (next.length < 8) return { error: "Nova lozinka mora imati bar 8 znakova." };
   if (next !== repeat) return { error: "Nove lozinke se ne poklapaju." };
-  await db.update(doctors).set({ passwordHash: hashPassword(next) }).where(eq(doctors.id, s.id));
-  return { ok: true, message: "Lozinka je promenjena." };
+  const passwordHash = hashPassword(next);
+  await db.update(doctors).set({ passwordHash }).where(eq(doctors.id, s.id));
+  // Nova lozinka odjavljuje sve druge uređaje; na ovom uređaju korisnik ostaje prijavljen.
+  await startSession(s.id, passwordHash);
+  return { ok: true, message: "Lozinka je promenjena. Odjavljeni ste sa svih drugih uređaja." };
 }
 
 // ——— Termini ———

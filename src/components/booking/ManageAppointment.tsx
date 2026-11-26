@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CalendarCheck, CalendarPlus, Clock, Download, LoaderCircle, MapPin, Phone, UserRound } from "lucide-react";
 import { cancelBooking, rescheduleBooking } from "@/lib/booking-actions";
 import { googleCalendarUrl } from "@/lib/calendar-links";
@@ -56,6 +56,13 @@ export function ManageAppointment({
   const [newSlot, setNewSlot] = useState<{ date: string; start: number } | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ tone: "ok" | "err"; text: string } | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const messageRef = useRef<HTMLParagraphElement>(null);
+
+  // Poruka je iznad izbora termina, a pacijent je kod dugmeta ispod: na telefonu je dovodimo u vidno polje.
+  useEffect(() => {
+    if (message) messageRef.current?.scrollIntoView({ block: "center" });
+  }, [message]);
 
   const active = data.status === "confirmed" || data.status === "pending";
   const hasTime = data.date && data.start != null;
@@ -89,6 +96,11 @@ export function ManageAppointment({
         tone: "err",
         text: res.error === "too_late" ? t.errors.tooLate : res.error === "slot_taken" ? t.errors.slotTaken : t.errors.generic,
       });
+      if (res.error === "slot_taken") {
+        // Zauzet termin je i dalje bio ponuđen: osvežavamo listu i poništavamo izbor
+        setNewSlot(null);
+        setRefreshKey((k) => k + 1);
+      }
     }
   }
 
@@ -135,7 +147,11 @@ export function ManageAppointment({
 
       <div className="p-6 sm:p-8">
         {message && (
-          <p role="status" className={`mb-5 rounded-2xl p-4 text-[15px] ${message.tone === "ok" ? "bg-brand-50 text-brand-900" : "bg-red-50 text-red-800"}`}>
+          <p
+            ref={messageRef}
+            role="status"
+            className={`mb-5 scroll-mt-24 rounded-2xl p-4 text-[15px] ${message.tone === "ok" ? "bg-brand-50 text-brand-900" : "bg-red-50 text-red-800"}`}
+          >
             {message.text}
           </p>
         )}
@@ -212,6 +228,7 @@ export function ManageAppointment({
                 selected={newSlot}
                 onSelect={(date, s) => setNewSlot({ date, start: s })}
                 excludeToken={data.token}
+                refreshKey={refreshKey}
                 contact={{ phone: clinic.phone, telHref: clinic.telHref }}
               />
             </div>
