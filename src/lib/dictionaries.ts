@@ -1,5 +1,7 @@
+import { emailEnabled } from "./features";
 import type { Locale } from "./i18n";
 
+// Tekstovi koji obećavaju mejl ili podsetnik prikazuju se samo kada sajt zaista šalje mejlove (vidi features.ts).
 const sr = {
   meta: {
     siteTitle: "Stomatolog i zubar u Batajnici | Dental Centar Jerković",
@@ -18,9 +20,11 @@ const sr = {
     close: "Zatvori",
     skip: "Preskoči na sadržaj",
     language: "Jezik",
+    mainNav: "Glavna navigacija",
   },
   common: {
     bookOnline: "Zakaži online",
+    breadcrumb: "Putanja",
     learnMore: "Saznaj više",
     from: "od",
     free: "Besplatno",
@@ -76,7 +80,9 @@ const sr = {
     steps: [
       { title: "Izaberite uslugu", text: "Od besplatnog prvog pregleda do konsultacije za aparatić ili implant." },
       { title: "Izaberite termin", text: "Vidite sve slobodne termine i birate onaj koji vam odgovara, i doktora ako želite." },
-      { title: "Stiže potvrda", text: "Potvrda i podsetnik stižu na e-mail, a termin možete pomeriti jednim klikom." },
+      emailEnabled
+        ? { title: "Stiže potvrda", text: "Potvrda i podsetnik stižu na e-mail, a termin možete pomeriti jednim klikom." }
+        : { title: "Potvrda odmah", text: "Potvrdu vidite odmah na ekranu, termin dodajete u kalendar telefona i pomerate ga jednim klikom." },
     ],
   },
   why: {
@@ -88,7 +94,9 @@ const sr = {
       { title: "Jasne cene unapred", text: "Posle pregleda dobijate plan terapije sa cenom. Bez skrivenih troškova." },
       { title: "Plaćanje na rate", text: "Kartice na rate i čekovi, a za veće radove plan plaćanja u fazama." },
       { title: "Radimo i popodne", text: "Ponedeljkom, utorkom i četvrtkom do 19h, lako je uklopiti termin posle posla ili škole." },
-      { title: "Podsetnik za kontrolu", text: "Sistem vas sam podseti kada je vreme za kontrolni pregled, pa problem ne stigne da naraste." },
+      emailEnabled
+        ? { title: "Podsetnik za kontrolu", text: "Sistem vas sam podseti kada je vreme za kontrolni pregled, pa problem ne stigne da naraste." }
+        : { title: "Zakazivanje 0–24", text: "Slobodne termine vidite uživo i zakazujete ih u bilo koje doba, bez čekanja na telefonu." },
     ],
   },
   teamSection: {
@@ -195,6 +203,8 @@ const sr = {
       "Zakažite pregled kod stomatologa u Batajnici online: izaberite uslugu, doktora i slobodan termin, a potvrda stiže odmah.",
     subtitle: "Izaberite uslugu i slobodan termin. Potvrdu dobijate odmah.",
     steps: ["Usluga", "Termin", "Vaši podaci"],
+    stepsLabel: "Koraci zakazivanja",
+    removeFilter: "Prikaži usluge svih doktora",
     popular: "Najčešće zakazivano",
     byCategory: "Sve usluge po oblastima",
     chooseService: "Šta vam je potrebno?",
@@ -209,6 +219,8 @@ const sr = {
     loading: "Učitavam slobodne termine…",
     noSlotsDay: "Za ovaj dan nema slobodnih termina.",
     noSlotsRange: "U ovom periodu nema slobodnih termina. Pogledajte sledeće dane ili nas pozovite.",
+    loadError: "Slobodne termine trenutno ne možemo da učitamo. Proverite internet vezu i pokušajte ponovo, ili nas pozovite.",
+    retry: "Pokušaj ponovo",
     closedDay: "ne radimo",
     fullDay: "popunjeno",
     prevDays: "Prethodni dani",
@@ -231,7 +243,9 @@ const sr = {
     phone: "Broj telefona",
     phoneHint: "Za slučaj da moramo da vas kontaktiramo.",
     email: "E-mail",
-    emailHint: "Na e-mail stiže potvrda i link za otkazivanje ili pomeranje termina.",
+    emailHint: emailEnabled
+      ? "Na e-mail stiže potvrda i link za otkazivanje ili pomeranje termina."
+      : "Koristimo ga samo za komunikaciju o vašem terminu.",
     note: "Napomena (nije obavezno)",
     notePlaceholder: "Npr. osetljivi zubi, strah od zubara, šta vas muči…",
     consent: "Saglasan/na sam da ordinacija obrađuje moje podatke radi zakazivanja i podsetnika, u skladu sa",
@@ -247,8 +261,16 @@ const sr = {
     preferred: "Željeni dani",
     doneInstantTitle: "Termin je potvrđen!",
     doneInstantText: "Potvrdu smo poslali na vaš e-mail. Vidimo se!",
+    doneInstantTextNoEmail: "Dodajte termin u kalendar telefona, da vas podseti na vreme. Vidimo se!",
     doneRequestTitle: "Zahtev je poslat!",
     doneRequestText: "Javićemo vam se sa predlogom termina. Potvrda prijema zahteva je stigla na vaš e-mail.",
+    doneRequestTextNoEmail: "Javićemo vam se sa predlogom termina.",
+    saveLinkTitle: "Sačuvajte link do svog termina",
+    saveLinkInstant: "Preko njega termin pomerate ili otkazujete. Link je i u opisu termina kada ga dodate u kalendar.",
+    saveLinkRequest: "Preko njega pratite status zahteva i vidite termin kada ga zakažemo.",
+    copyLink: "Kopiraj link",
+    copied: "Link je kopiran",
+    shareLink: "Pošalji sebi",
     addToCalendar: "Dodaj u kalendar",
     googleCalendar: "Google Calendar",
     manage: "Pomeri ili otkaži termin",
@@ -284,6 +306,7 @@ const sr = {
     no: "Ne",
     cancelled: "Termin je otkazan. Hvala što ste nam javili na vreme.",
     rescheduled: "Termin je pomeren. Nova potvrda je poslata na e-mail.",
+    rescheduledNoEmail: "Termin je pomeren. Nove detalje vidite ispod.",
     pickNew: "Izaberite novi termin",
     confirmNew: "Potvrdi novi termin",
     tooLate: "Do termina je ostalo manje od {h} sata. Za izmene nas pozovite:",
@@ -347,9 +370,11 @@ const en: Dict = {
     close: "Close",
     skip: "Skip to content",
     language: "Language",
+    mainNav: "Main navigation",
   },
   common: {
     bookOnline: "Book online",
+    breadcrumb: "Breadcrumb",
     learnMore: "Learn more",
     from: "from",
     free: "Free",
@@ -405,7 +430,9 @@ const en: Dict = {
     steps: [
       { title: "Choose a service", text: "From a free first check-up to a consultation for braces or implants." },
       { title: "Pick a time", text: "See every available slot and choose the one that suits you, and your dentist if you like." },
-      { title: "Get confirmation", text: "Confirmation and a reminder arrive by e-mail, and you can reschedule in one click." },
+      emailEnabled
+        ? { title: "Get confirmation", text: "Confirmation and a reminder arrive by e-mail, and you can reschedule in one click." }
+        : { title: "Instant confirmation", text: "You see the confirmation on screen right away, add the appointment to your phone's calendar and reschedule in one click." },
     ],
   },
   why: {
@@ -417,7 +444,9 @@ const en: Dict = {
       { title: "Clear prices upfront", text: "After the check-up you get a treatment plan with prices. No hidden costs." },
       { title: "Pay in instalments", text: "Instalment cards and cheques, plus staged payment plans for larger treatments." },
       { title: "Open in the afternoon", text: "Until 7 pm on Mondays, Tuesdays and Thursdays, easy to fit in after work or school." },
-      { title: "Check-up reminders", text: "Our system reminds you when your next check-up is due, before small problems grow." },
+      emailEnabled
+        ? { title: "Check-up reminders", text: "Our system reminds you when your next check-up is due, before small problems grow." }
+        : { title: "Book 24/7", text: "See available times live and book whenever it suits you, with no waiting on the phone." },
     ],
   },
   teamSection: {
@@ -523,6 +552,8 @@ const en: Dict = {
       "Book a dental appointment in Batajnica, Belgrade online: choose a service, a dentist and a free time slot, with instant confirmation.",
     subtitle: "Choose a service and an available time. You get confirmation instantly.",
     steps: ["Service", "Time", "Your details"],
+    stepsLabel: "Booking steps",
+    removeFilter: "Show services of all dentists",
     popular: "Most booked",
     byCategory: "All services by area",
     chooseService: "What do you need?",
@@ -537,6 +568,8 @@ const en: Dict = {
     loading: "Loading available times…",
     noSlotsDay: "No available times on this day.",
     noSlotsRange: "No available times in this period. Check the next days or give us a call.",
+    loadError: "We couldn't load available times just now. Check your connection and try again, or give us a call.",
+    retry: "Try again",
     closedDay: "closed",
     fullDay: "fully booked",
     prevDays: "Previous days",
@@ -559,7 +592,9 @@ const en: Dict = {
     phone: "Phone number",
     phoneHint: "In case we need to reach you. International numbers welcome (+44…, +49…).",
     email: "E-mail",
-    emailHint: "Your confirmation and a link to cancel or reschedule are sent here.",
+    emailHint: emailEnabled
+      ? "Your confirmation and a link to cancel or reschedule are sent here."
+      : "We only use it to contact you about your appointment.",
     note: "Note (optional)",
     notePlaceholder: "E.g. sensitive teeth, dental anxiety, what's bothering you…",
     consent: "I agree that the clinic may process my data for booking and reminders, in line with the",
@@ -575,8 +610,16 @@ const en: Dict = {
     preferred: "Preferred days",
     doneInstantTitle: "Your appointment is confirmed!",
     doneInstantText: "We've sent the confirmation to your e-mail. See you soon!",
+    doneInstantTextNoEmail: "Add the appointment to your phone's calendar so it reminds you in time. See you soon!",
     doneRequestTitle: "Request sent!",
     doneRequestText: "We'll get back to you with a proposed time. A confirmation of your request has been sent to your e-mail.",
+    doneRequestTextNoEmail: "We'll get back to you with a proposed time.",
+    saveLinkTitle: "Save the link to your appointment",
+    saveLinkInstant: "Use it to reschedule or cancel. The link is also in the event details when you add it to your calendar.",
+    saveLinkRequest: "Use it to check the status of your request and see your appointment once we've scheduled it.",
+    copyLink: "Copy link",
+    copied: "Link copied",
+    shareLink: "Send to myself",
     addToCalendar: "Add to calendar",
     googleCalendar: "Google Calendar",
     manage: "Reschedule or cancel",
@@ -612,6 +655,7 @@ const en: Dict = {
     no: "No",
     cancelled: "Your appointment has been cancelled. Thank you for letting us know in time.",
     rescheduled: "Your appointment has been moved. A new confirmation has been sent to your e-mail.",
+    rescheduledNoEmail: "Your appointment has been moved. You can see the new details below.",
     pickNew: "Choose a new time",
     confirmNew: "Confirm new time",
     tooLate: "Less than {h} hours remain before your appointment. To make changes, please call:",

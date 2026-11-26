@@ -89,6 +89,8 @@ export default async function AppointmentPage({ params }: Props) {
             loading: b.loading,
             noSlotsDay: b.noSlotsDay,
             noSlotsRange: b.noSlotsRange,
+            loadError: b.loadError,
+            retry: b.retry,
             closedDay: b.closedDay,
             fullDay: b.fullDay,
             prevDays: b.prevDays,

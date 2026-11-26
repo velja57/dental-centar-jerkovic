@@ -39,7 +39,7 @@ const bookingSchema = z.object({
 
 export type BookingInput = z.input<typeof bookingSchema>;
 export type BookingResult =
-  | { ok: true; token: string; status: "confirmed" | "pending"; doctorId: number | null }
+  | { ok: true; token: string; status: "confirmed" | "pending"; doctorId: number | null; emailed: boolean }
   | { ok: false; error: "validation" | "slot_taken" | "too_many" | "generic"; field?: string };
 
 async function findOrCreatePatient(
@@ -154,8 +154,8 @@ export async function createBooking(raw: BookingInput): Promise<BookingResult> {
         return { id: row.id, doctorId: doctor.id };
       });
       if (!result) return { ok: false, error: "slot_taken" };
-      await notifyAppointment(result.id, "confirmed", { clinic: true });
-      return { ok: true, token, status: "confirmed", doctorId: result.doctorId };
+      const sent = await notifyAppointment(result.id, "confirmed", { clinic: true });
+      return { ok: true, token, status: "confirmed", doctorId: result.doctorId, emailed: sent.patientEmailSent };
     }
 
     // Usluga na upit: čuvamo željene dane, ordinacija predlaže termin
@@ -181,8 +181,8 @@ export async function createBooking(raw: BookingInput): Promise<BookingResult> {
         .returning({ id: appointments.id });
       return row.id;
     });
-    await notifyAppointment(id, "request_received", { clinic: true });
-    return { ok: true, token, status: "pending", doctorId: input.doctorId };
+    const sent = await notifyAppointment(id, "request_received", { clinic: true });
+    return { ok: true, token, status: "pending", doctorId: input.doctorId, emailed: sent.patientEmailSent };
   } catch (e) {
     console.error("createBooking", e);
     return { ok: false, error: "generic" };
@@ -215,7 +215,7 @@ export async function rescheduleBooking(input: {
   date: string;
   start: number;
   doctorId?: number | null;
-}): Promise<{ ok: true } | { ok: false; error: "not_found" | "too_late" | "slot_taken" | "generic" }> {
+}): Promise<{ ok: true; emailed: boolean } | { ok: false; error: "not_found" | "too_late" | "slot_taken" | "generic" }> {
   try {
     const [a] = await db.select().from(appointments).where(eq(appointments.token, String(input.token)));
     if (!a) return { ok: false, error: "not_found" };
@@ -259,8 +259,8 @@ export async function rescheduleBooking(input: {
       return true;
     });
     if (!ok) return { ok: false, error: "slot_taken" };
-    await notifyAppointment(a.id, "rescheduled", { clinic: true });
-    return { ok: true };
+    const sent = await notifyAppointment(a.id, "rescheduled", { clinic: true });
+    return { ok: true, emailed: sent.patientEmailSent };
   } catch (e) {
     console.error("rescheduleBooking", e);
     return { ok: false, error: "generic" };

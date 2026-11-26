@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BellRing, CalendarCheck, ShieldCheck } from "lucide-react";
+import { BellRing, CalendarCheck, CalendarClock, ShieldCheck } from "lucide-react";
 import { BookingWizard, type WCategory, type WDoctor, type WService } from "@/components/booking/BookingWizard";
 import { isCategoryKey } from "@/content/category-slugs";
 import { clinic, telLink } from "@/content/clinic";
@@ -7,6 +7,7 @@ import { categories } from "@/content/services";
 import { teamContent } from "@/content/team";
 import { parseSlugs } from "@/lib/availability";
 import { getDict } from "@/lib/dictionaries";
+import { emailEnabled } from "@/lib/features";
 import { initials, priceParts, priceText } from "@/lib/format";
 import { alternates, href, type Locale } from "@/lib/i18n";
 import { getActiveDoctors, getActiveServices } from "@/lib/public-data";
@@ -62,7 +63,8 @@ export default async function BookingPage({ params, searchParams }: Props) {
   const perks = [
     { icon: CalendarCheck, text: t.hero.trust[3] },
     { icon: ShieldCheck, text: t.hero.trust[0] },
-    { icon: BellRing, text: t.why.items[5].title },
+    // „Podsetnik za kontrolu“ kada sajt šalje mejlove, inače „Zakazivanje 0–24“ (vidi features.ts)
+    { icon: emailEnabled ? BellRing : CalendarClock, text: t.why.items[5].title },
   ];
 
   return (

@@ -70,6 +70,20 @@ export function switchLocalePath(pathname: string, target: Locale): string {
   return href(target, key, ...rest);
 }
 
+/**
+ * Engleska adresa sa srpskim nazivom stranice (/en/cenovnik, /en/usluge/ortodoncija) otvarala je istu
+ * stranicu kao /en/prices — dve adrese za isti sadržaj. Vraća pravu englesku adresu za trajno
+ * preusmerenje (308), ili null ako je adresa već ispravna.
+ */
+export function fixEnglishSlug(pathname: string): string | null {
+  const parts = pathname.split("/").filter(Boolean);
+  if (parts[0] !== "en" || parts.length < 2) return null;
+  const first = decodeURIComponent(parts[1]);
+  if (!routeKeys.some((k) => routes[k].sr !== "" && routes[k].sr === first)) return null;
+  const target = switchLocalePath("/" + parts.slice(1).join("/"), "en");
+  return target === pathname ? null : target; // isti naziv na oba jezika: nema preusmerenja (i nema petlje)
+}
+
 /** hreflang alternativne adrese za metapodatke stranice. */
 export function alternates(locale: Locale, key: RouteKey, rest: { sr?: string[]; en?: string[] } = {}) {
   const sr = href("sr", key, ...(rest.sr ?? []));

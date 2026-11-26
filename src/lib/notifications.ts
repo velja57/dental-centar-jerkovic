@@ -212,15 +212,25 @@ function clinicEmail(kind: NotifyKind, r: Full) {
   };
 }
 
-/** Šalje mejl pacijentu (i po želji ordinaciji). Greške ne prekidaju zakazivanje. */
-export async function notifyAppointment(appointmentId: number, kind: NotifyKind, opts: { clinic?: boolean } = {}) {
+/**
+ * Šalje mejl pacijentu (i po želji ordinaciji). Greške ne prekidaju zakazivanje.
+ * Vraća da li je mejl pacijentu zaista otišao, da sajt ne bi tvrdio da je potvrda poslata kada nije
+ * (npr. dok slanje mejlova nije podešeno, pa se mejl samo beleži u admin → Poruke).
+ */
+export async function notifyAppointment(
+  appointmentId: number,
+  kind: NotifyKind,
+  opts: { clinic?: boolean } = {},
+): Promise<{ patientEmailSent: boolean }> {
+  let patientEmailSent = false;
   try {
     const r = await loadFull(appointmentId);
-    if (!r) return;
+    if (!r) return { patientEmailSent };
     const loc: Loc = r.a.locale === "en" ? "en" : "sr";
     const mail = patientEmail(kind, r, loc);
     if (r.p.email && mail) {
-      await sendEmail({ to: r.p.email, subject: mail.subject, html: mail.html, text: mail.text, kind, appointmentId });
+      const status = await sendEmail({ to: r.p.email, subject: mail.subject, html: mail.html, text: mail.text, kind, appointmentId });
+      patientEmailSent = status === "sent";
     }
     if (opts.clinic && process.env.CLINIC_NOTIFY_EMAIL) {
       const c = clinicEmail(kind, r);
@@ -229,4 +239,5 @@ export async function notifyAppointment(appointmentId: number, kind: NotifyKind,
   } catch (e) {
     console.error("notifyAppointment", kind, e);
   }
+  return { patientEmailSent };
 }

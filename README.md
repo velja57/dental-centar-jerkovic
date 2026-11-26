@@ -50,6 +50,8 @@ Svaki doktor vidi svoj kalendar; administrator vidi sve.
 **Automatski mejlovi:** potvrda, obaveštenje ordinaciji o novoj rezervaciji, pomeranje, otkazivanje, podsetnik dan pre,
 molba za Google recenziju posle posete, poziv na kontrolu posle 6 meseci (`/api/cron/daily`, Vercel Cron svako jutro).
 Dok nije podešen `RESEND_API_KEY`, mejlovi se **samo beleže** u admin → Poruke (ništa ne odlazi napolje).
+Tada sajt i ne obećava mejl: pacijent posle zakazivanja dobija link do termina (kopiranje, „Pošalji sebi“, kalendar),
+a tekstovi o mejlu i podsetnicima se sami vraćaju kada se podese `RESEND_API_KEY` i `EMAIL_FROM` (`src/lib/features.ts`).
 
 ## Objava (kada odlučite)
 

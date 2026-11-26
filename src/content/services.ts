@@ -1,5 +1,6 @@
 import { categorySlugs, type CategoryKey } from "./category-slugs";
 import { images, type SitePhoto } from "./images";
+import { emailEnabled } from "../lib/features";
 import type { Locale } from "@/lib/i18n";
 
 type L = { sr: string; en: string };
@@ -139,21 +140,22 @@ export const categories: Category[] = [
       en: "Regular check-ups, scaling and Air Flow polishing, the most affordable way to keep your teeth healthy.",
     },
     intro: {
-      sr: "Većina problema sa zubima može se sprečiti ili rešiti dok je mala i jeftina. Zato preporučujemo kontrolu na svakih šest meseci, a naš sistem vas sam podseti kada je vreme za sledeći pregled.",
-      en: "Most dental problems can be prevented, or fixed while they are still small and inexpensive. That's why we recommend a check-up every six months, and our system reminds you when the next one is due.",
+      // Podsetnik za kontrolu stiže mejlom, pa se pominje samo kada sajt zaista šalje mejlove (features.ts).
+      sr: `Većina problema sa zubima može se sprečiti ili rešiti dok je mala i jeftina. Zato preporučujemo kontrolu na svakih šest meseci${emailEnabled ? ", a naš sistem vas sam podseti kada je vreme za sledeći pregled" : ""}.`,
+      en: `Most dental problems can be prevented, or fixed while they are still small and inexpensive. That's why we recommend a check-up every six months${emailEnabled ? ", and our system reminds you when the next one is due" : ""}.`,
     },
     benefits: {
       sr: [
         "Besplatan prvi pregled i plan terapije sa cenama",
         "Ultrazvučno uklanjanje kamenca i poliranje",
         "Peskiranje za uklanjanje mrlja od kafe, čaja i duvana",
-        "Automatski podsetnik za kontrolu na šest meseci",
+        emailEnabled ? "Automatski podsetnik za kontrolu na šest meseci" : "Kontrolu zakazujete online, u par klikova",
       ],
       en: [
         "A free first check-up and a priced treatment plan",
         "Ultrasonic scaling and polishing",
         "Air Flow polishing to remove coffee, tea and tobacco stains",
-        "An automatic reminder for your six-month check-up",
+        emailEnabled ? "An automatic reminder for your six-month check-up" : "Book your check-up online in a few clicks",
       ],
     },
     forWhom: {
@@ -173,13 +175,17 @@ export const categories: Category[] = [
         { t: "Razgovor i pregled", d: "Pregledamo zube, desni i postojeće plombe i pitamo vas da li vas nešto muči." },
         { t: "Uklanjanje kamenca", d: "Kamenac uklanjamo ultrazvučnim aparatom, a zatim poliramo zube." },
         { t: "Peskiranje po potrebi", d: "Mrlje od kafe, čaja ili duvana uklanjamo peskiranjem (Air Flow)." },
-        { t: "Saveti i podsetnik", d: "Dobijate savete za održavanje higijene, a sistem vas podseti kada je vreme za sledeću kontrolu." },
+        emailEnabled
+          ? { t: "Saveti i podsetnik", d: "Dobijate savete za održavanje higijene, a sistem vas podseti kada je vreme za sledeću kontrolu." }
+          : { t: "Saveti za kod kuće", d: "Dobijate savete za održavanje higijene i preporuku kada da dođete na sledeću kontrolu." },
       ],
       en: [
         { t: "Chat and check-up", d: "We examine your teeth, gums and existing fillings and ask whether anything is bothering you." },
         { t: "Scaling", d: "Tartar is removed with an ultrasonic scaler, and then your teeth are polished." },
         { t: "Air Flow if needed", d: "Coffee, tea or tobacco stains are removed with Air Flow polishing." },
-        { t: "Advice and a reminder", d: "You get hygiene tips, and our system reminds you when your next check-up is due." },
+        emailEnabled
+          ? { t: "Advice and a reminder", d: "You get hygiene tips, and our system reminds you when your next check-up is due." }
+          : { t: "Advice for home care", d: "You get hygiene tips and a recommendation for when to come back for your next check-up." },
       ],
     },
     faq: {
@@ -213,8 +219,8 @@ export const categories: Category[] = [
       ],
     },
     seo: {
-      sr: "Stomatološki pregled, uklanjanje kamenca i peskiranje u Batajnici. Besplatan prvi pregled i podsetnik za kontrolu na šest meseci.",
-      en: "Dental check-ups, scaling and Air Flow polishing in Batajnica, Belgrade. Free first check-up and six-month reminders.",
+      sr: `Stomatološki pregled, uklanjanje kamenca i peskiranje u Batajnici. Besplatan prvi pregled i ${emailEnabled ? "podsetnik za kontrolu na šest meseci" : "online zakazivanje"}.`,
+      en: `Dental check-ups, scaling and Air Flow polishing in Batajnica, Belgrade. Free first check-up and ${emailEnabled ? "six-month reminders" : "online booking"}.`,
     },
   },
   {

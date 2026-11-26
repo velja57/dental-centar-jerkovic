@@ -23,7 +23,7 @@ export function Header({ locale, t }: { locale: Locale; t: Dict }) {
         <Link href={homeHref} aria-label={`${clinic.name}, ${t.nav.home}`} className="shrink-0">
           <Logo />
         </Link>
-        <NavLinks items={items} homeHref={homeHref} />
+        <NavLinks items={items} homeHref={homeHref} label={t.nav.mainNav} />
         <div className="flex items-center gap-2 sm:gap-3">
           <LangSwitch locale={locale} label={t.nav.language} />
           <a href={telLink} className="hidden items-center gap-2 text-sm font-bold text-ink hover:text-brand-700 xl:flex">

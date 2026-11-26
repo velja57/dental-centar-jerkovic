@@ -1,3 +1,4 @@
+import { emailEnabled } from "@/lib/features";
 import { clinic } from "./clinic";
 
 // Radno vreme rečenicom, iz clinic.hours (da odgovor nikad ne odstupa od tabele radnog vremena).
@@ -41,7 +42,7 @@ export const generalFaq = {
     },
     {
       q: "Kako mogu da otkažem ili pomerim termin?",
-      a: `Preko linka iz e-maila potvrde, najkasnije ${clinic.booking.cancelHours} sata pre termina. Kasnije izmene dogovaramo telefonom.`,
+      a: `Preko linka „Pomeri ili otkaži termin“ koji dobijate odmah posle zakazivanja${emailEnabled ? " (i u e-mailu potvrde)" : ""}, najkasnije ${clinic.booking.cancelHours} sata pre termina. Kasnije izmene dogovaramo telefonom.`,
     },
     {
       q: "Da li mogu da platim na rate?",
@@ -75,7 +76,7 @@ export const generalFaq = {
     },
     {
       q: "How can I cancel or reschedule?",
-      a: `Use the link in your confirmation e-mail, no later than ${clinic.booking.cancelHours} hours before the appointment. Later changes can be arranged by phone.`,
+      a: `Use the “Reschedule or cancel” link you get right after booking${emailEnabled ? " (also in your confirmation e-mail)" : ""}, no later than ${clinic.booking.cancelHours} hours before the appointment. Later changes can be arranged by phone.`,
     },
     {
       q: "Can I pay in instalments?",

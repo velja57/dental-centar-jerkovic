@@ -14,10 +14,10 @@ function isActive(pathname: string, href: string, homeHref: string) {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function NavLinks({ items, homeHref }: { items: NavItem[]; homeHref: string }) {
+export function NavLinks({ items, homeHref, label }: { items: NavItem[]; homeHref: string; label: string }) {
   const pathname = usePathname();
   return (
-    <nav aria-label="Glavna navigacija" className="hidden items-center gap-1 lg:flex">
+    <nav aria-label={label} className="hidden items-center gap-1 lg:flex">
       {items.map((item) => {
         const active = isActive(pathname, item.href, homeHref);
         return (
@@ -39,12 +39,16 @@ export function NavLinks({ items, homeHref }: { items: NavItem[]; homeHref: stri
 
 export function LangSwitch({ locale, label }: { locale: Locale; label: string }) {
   const pathname = usePathname();
+  // Prelazak na drugi jezik zadržava izbor iz adrese (npr. ?usluga=… na zakazivanju). Čita se posle
+  // učitavanja, da serverski i klijentski HTML budu isti.
+  const [search, setSearch] = useState("");
+  useEffect(() => setSearch(window.location.search), [pathname]);
   return (
     <div role="group" aria-label={label} className="flex items-center rounded-full border border-slate-200 bg-white p-0.5 text-xs font-bold">
       {(["sr", "en"] as const).map((l) => (
         <Link
           key={l}
-          href={switchLocalePath(pathname, l)}
+          href={switchLocalePath(pathname, l) + search}
           hrefLang={l}
           aria-current={l === locale ? "true" : undefined}
           className={`rounded-full px-2.5 py-1 uppercase transition ${l === locale ? "bg-brand-600 text-white" : "text-slate-500 hover:text-ink"}`}

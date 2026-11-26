@@ -21,6 +21,7 @@ import { WhatsAppIcon } from "@/components/site/BrandIcons";
 import { HoursList } from "@/components/site/HoursList";
 import { JsonLd } from "@/components/site/JsonLd";
 import { MapFacade } from "@/components/site/MapFacade";
+import { NextSlot } from "@/components/site/NextSlot";
 import { Photo } from "@/components/site/Photo";
 import { DoctorAvatar, FaqList, SectionHeading, Stars } from "@/components/site/ui";
 import { clinic, mapsDirectionsUrl, mapsEmbedUrl, telLink, waLink } from "@/content/clinic";
@@ -35,10 +36,11 @@ import { priceParts } from "@/lib/format";
 import { alternates, href, serviceCategoryHref, type Locale } from "@/lib/i18n";
 import { faqJsonLd, websiteJsonLd } from "@/lib/jsonld";
 import { getActiveDoctors, getActiveServices, lowestPrice } from "@/lib/public-data";
+import { emailEnabled } from "@/lib/features";
 import { doctorTitle } from "@/lib/site";
-import { fmtSlotRelative } from "@/lib/time";
 
-export const revalidate = 300; // osvežavanje "prvog slobodnog termina" na 5 min
+// Stranica se osvežava na 5 min; „prvi slobodan termin“ se pored toga uvek proverava u pregledaču (NextSlot).
+export const revalidate = 300;
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -48,7 +50,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: { absolute: t.meta.siteTitle }, description: t.meta.siteDescription, alternates: alternates(locale, "home") };
 }
 
-const WHY_ICONS = [HeartHandshake, Users, Receipt, CreditCard, Clock, Bell];
+// Šesta stavka je „Podsetnik za kontrolu“ samo kada sajt šalje mejlove, inače „Zakazivanje 0–24“.
+const WHY_ICONS = [HeartHandshake, Users, Receipt, CreditCard, Clock, emailEnabled ? Bell : CalendarClock];
 
 export default async function HomePage({ params }: Props) {
   const locale = (await params).locale as Locale;
@@ -128,7 +131,7 @@ export default async function HomePage({ params }: Props) {
               <span className="min-w-0">
                 <span className="block text-xs font-bold tracking-wide text-slate-500 uppercase">{t.hero.nextSlotLabel}</span>
                 <span className="block truncate text-base font-extrabold text-ink">
-                  {next ? fmtSlotRelative(next.date, next.start, locale, next.today) : t.hero.seeSlots}
+                  <NextSlot initial={next} locale={locale} fallback={t.hero.seeSlots} leadMinutes={clinic.booking.minLeadMinutes} />
                 </span>
                 <span className="block text-sm font-medium text-brand-700">{t.hero.nextSlotService}</span>
               </span>

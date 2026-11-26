@@ -79,7 +79,8 @@ export function ManageAppointment({
     const res = await rescheduleBooking({ token: data.token, date: newSlot.date, start: newSlot.start, doctorId: data.doctorId });
     setBusy(false);
     if (res.ok) {
-      setMessage({ tone: "ok", text: t.rescheduled });
+      // „Nova potvrda je poslata na e-mail“ samo ako je mejl zaista otišao
+      setMessage({ tone: "ok", text: res.emailed ? t.rescheduled : t.rescheduledNoEmail });
       setView("details");
       setNewSlot(null);
       router.refresh();
@@ -211,6 +212,7 @@ export function ManageAppointment({
                 selected={newSlot}
                 onSelect={(date, s) => setNewSlot({ date, start: s })}
                 excludeToken={data.token}
+                contact={{ phone: clinic.phone, telHref: clinic.telHref }}
               />
             </div>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">

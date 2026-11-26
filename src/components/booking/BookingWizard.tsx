@@ -6,12 +6,16 @@ import {
   ArrowLeft,
   CalendarCheck,
   CalendarPlus,
+  Check,
   CircleCheck,
   Clock,
+  Copy,
   Download,
   Info,
+  Link2,
   LoaderCircle,
   Phone,
+  Share2,
   Sparkles,
   UserRound,
   X,
@@ -93,7 +97,7 @@ export function BookingWizard(props: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [result, setResult] = useState<{ token: string; status: "confirmed" | "pending"; doctorId: number | null } | null>(null);
+  const [result, setResult] = useState<{ token: string; status: "confirmed" | "pending"; doctorId: number | null; emailed: boolean } | null>(null);
 
   const service = services.find((s) => s.id === serviceId) ?? null;
   const serviceDoctors = service ? doctors.filter((d) => service.doctorIds.includes(d.id)) : [];
@@ -156,7 +160,7 @@ export function BookingWizard(props: Props) {
     }).catch(() => ({ ok: false as const, error: "generic" as const }));
     setSubmitting(false);
     if (res.ok) {
-      setResult({ token: res.token, status: res.status, doctorId: res.doctorId });
+      setResult({ token: res.token, status: res.status, doctorId: res.doctorId, emailed: res.emailed });
       // Jednom po uspešnom zakazivanju; bez ličnih podataka i bez konkretne usluge (samo oblast).
       track("booking_completed", { mode: res.status === "confirmed" ? "instant" : "request", category: service.category });
       go(3);
@@ -181,6 +185,8 @@ export function BookingWizard(props: Props) {
     loading: t.loading,
     noSlotsDay: t.noSlotsDay,
     noSlotsRange: t.noSlotsRange,
+    loadError: t.loadError,
+    retry: t.retry,
     closedDay: t.closedDay,
     fullDay: t.fullDay,
     prevDays: t.prevDays,
@@ -240,7 +246,16 @@ export function BookingWizard(props: Props) {
           <CircleCheck className="h-9 w-9" />
         </span>
         <h2 className="mt-5 text-3xl font-extrabold text-ink">{confirmed ? t.doneInstantTitle : t.doneRequestTitle}</h2>
-        <p className="lead mt-3">{confirmed ? t.doneInstantText : t.doneRequestText}</p>
+        {/* „Poslali smo vam mejl“ samo ako je mejl zaista otišao (dok slanje nije podešeno, ne odlazi) */}
+        <p className="lead mt-3">
+          {confirmed
+            ? result.emailed
+              ? t.doneInstantText
+              : t.doneInstantTextNoEmail
+            : result.emailed
+              ? t.doneRequestText
+              : t.doneRequestTextNoEmail}
+        </p>
         <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 text-left shadow-soft">
           <p className="text-lg font-extrabold text-ink">{service.name}</p>
           {confirmed && (
@@ -279,6 +294,14 @@ export function BookingWizard(props: Props) {
             {t.manage}
           </Link>
         </div>
+        {!result.emailed && (
+          <SaveLink
+            href={manageHref}
+            title={t.saveLinkTitle}
+            text={confirmed ? t.saveLinkInstant : t.saveLinkRequest}
+            labels={{ copy: t.copyLink, copied: t.copied, share: t.shareLink }}
+          />
+        )}
         {confirmed && <p className="mt-5 text-sm text-slate-500">{t.cancelPolicy.replace("{h}", String(props.cancelHours))}</p>}
         <button
           type="button"
@@ -300,7 +323,7 @@ export function BookingWizard(props: Props) {
   return (
     <div ref={rootRef} className="scroll-mt-24">
       {/* Koraci */}
-      <ol className="mb-8 grid grid-cols-3 gap-2" aria-label="Koraci">
+      <ol className="mb-8 grid grid-cols-3 gap-2" aria-label={t.stepsLabel}>
         {t.steps.map((label, i) => {
           const done = i < step;
           const current = i === step;
@@ -336,7 +359,7 @@ export function BookingWizard(props: Props) {
           {doctorFilter && (
             <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-brand-50 py-1 pr-1 pl-3 text-sm font-semibold text-brand-800">
               {doctors.find((d) => d.id === doctorFilter)?.name}
-              <button type="button" onClick={() => setDoctorFilter(null)} className="rounded-full p-1 hover:bg-brand-100" aria-label="x">
+              <button type="button" onClick={() => setDoctorFilter(null)} className="rounded-full p-1 hover:bg-brand-100" aria-label={t.removeFilter}>
                 <X className="h-3.5 w-3.5" />
               </button>
             </p>
@@ -471,6 +494,7 @@ export function BookingWizard(props: Props) {
                   labels={slotLabels}
                   selected={slot}
                   refreshKey={refreshKey}
+                  contact={{ phone: props.clinic.phone, telHref: props.clinic.telHref }}
                   onSelect={(date, start) => {
                     setSlot({ date, start });
                     go(2);
@@ -484,7 +508,14 @@ export function BookingWizard(props: Props) {
                   </div>
                   <p className="mt-6 text-sm font-bold text-ink">{t.preferredDays}</p>
                   <div className="mt-3">
-                    <PreferredDaysPicker serviceId={service.id} locale={locale} labels={slotLabels} value={prefDates} onChange={setPrefDates} />
+                    <PreferredDaysPicker
+                      serviceId={service.id}
+                      locale={locale}
+                      labels={slotLabels}
+                      value={prefDates}
+                      onChange={setPrefDates}
+                      contact={{ phone: props.clinic.phone, telHref: props.clinic.telHref }}
+                    />
                   </div>
                   <p className="mt-6 text-sm font-bold text-ink">{t.timeOfDay}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
@@ -659,6 +690,73 @@ export function BookingWizard(props: Props) {
           <aside className="hidden lg:block">{summary}</aside>
         </form>
       )}
+    </div>
+  );
+}
+
+/**
+ * Link do termina, kada potvrda nije otišla mejlom: bez njega pacijent posle zatvaranja stranice
+ * ne bi mogao sam da pomeri ili otkaže termin. Kopiranje, a na telefonu i „Pošalji sebi“ (Viber, WhatsApp, beleške…).
+ * Prikazuje se tek posle zakazivanja (samo u pregledaču), pa je window dostupan.
+ */
+function SaveLink({ href, title, text, labels }: { href: string; title: string; text: string; labels: { copy: string; copied: string; share: string } }) {
+  const [copied, setCopied] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const url = typeof window === "undefined" ? href : window.location.origin + href;
+  const canShare = typeof navigator !== "undefined" && typeof navigator.share === "function";
+
+  function done() {
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  }
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(url);
+      done();
+    } catch {
+      // Stariji pregledači ili zabranjen pristup: označi link i probaj staru komandu za kopiranje
+      const el = inputRef.current;
+      if (!el) return;
+      el.focus();
+      el.select();
+      try {
+        if (document.execCommand("copy")) done();
+      } catch {
+        // link ostaje označen, korisnik ga kopira sam
+      }
+    }
+  }
+
+  return (
+    <div className="mt-6 rounded-3xl border border-brand-100 bg-brand-50/60 p-5 text-left">
+      <p className="flex items-center gap-2 font-bold text-ink">
+        <Link2 className="h-5 w-5 shrink-0 text-brand-600" /> {title}
+      </p>
+      <p className="mt-1 text-sm text-slate-600">{text}</p>
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+        <input
+          ref={inputRef}
+          readOnly
+          value={url}
+          onFocus={(e) => e.currentTarget.select()}
+          aria-label={title}
+          className="input min-w-0 flex-1 text-sm"
+        />
+        <button type="button" onClick={copy} className="btn btn-outline shrink-0">
+          {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+          <span aria-live="polite">{copied ? labels.copied : labels.copy}</span>
+        </button>
+        {canShare && (
+          <button
+            type="button"
+            onClick={() => navigator.share({ title, url }).catch(() => {})}
+            className="btn btn-outline shrink-0"
+          >
+            <Share2 className="h-4 w-4" /> {labels.share}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

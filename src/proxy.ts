@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { toInternalPath } from "@/lib/i18n";
+import { fixEnglishSlug, toInternalPath } from "@/lib/i18n";
 import { siteUrl } from "@/lib/site";
 
 // Kada se poveže sopstveni domen, siteUrl postaje taj domen (VERCEL_PROJECT_PRODUCTION_URL ili NEXT_PUBLIC_SITE_URL).
@@ -10,6 +10,7 @@ const canonicalHost = new URL(siteUrl).host;
  *   /cenovnik      → interno /sr/cenovnik
  *   /en/prices     → interno /en/cenovnik
  *   /sr/...        → trajno preusmerenje na adresu bez /sr
+ *   /en/cenovnik   → trajno preusmerenje na /en/prices (jedna adresa po stranici)
  * Posle povezivanja domena: stranice sa *.vercel.app (produkcija) trajno se preusmeravaju na domen,
  * da Google ne bi video dva sajta sa istim sadržajem. Dok domena nema, adrese su iste i ništa se ne dešava.
  */
@@ -25,6 +26,13 @@ export function proxy(request: NextRequest) {
   if (pathname === "/sr" || pathname.startsWith("/sr/")) {
     const url = request.nextUrl.clone();
     url.pathname = pathname.slice(3) || "/";
+    return NextResponse.redirect(url, 308);
+  }
+
+  const english = fixEnglishSlug(pathname);
+  if (english) {
+    const url = request.nextUrl.clone();
+    url.pathname = english;
     return NextResponse.redirect(url, 308);
   }
 
