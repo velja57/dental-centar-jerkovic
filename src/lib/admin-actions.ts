@@ -55,6 +55,19 @@ async function findConflict(doctorId: number, date: string, start: number, end: 
   return null;
 }
 
+/**
+ * Postojeći karton: isti broj telefona I isto ime (porodica često deli jedan broj, pa sam broj nije dovoljan).
+ * Bez ovoga recepcija koja ukuca ime i broj umesto da izabere pacijenta pravi drugi karton iste osobe.
+ */
+async function findPatient(phone: string, fullName: string) {
+  const norm = (v: string) => v.toLocaleLowerCase("sr").replace(/\s+/g, " ").trim();
+  const rows = await db
+    .select({ id: patients.id, fullName: patients.fullName, email: patients.email, guardianName: patients.guardianName })
+    .from(patients)
+    .where(eq(patients.phone, phone));
+  return rows.find((r) => norm(r.fullName) === norm(fullName)) ?? null;
+}
+
 // ——— Prijava ———
 
 export async function loginAction(_prev: FormState, fd: FormData): Promise<FormState> {
@@ -163,24 +176,41 @@ export async function createAppointmentAction(_prev: FormState, fd: FormData): P
   const [svc] = await db.select().from(services).where(eq(services.id, serviceId));
   if (!svc) return { error: "Usluga nije pronađena." };
 
+  let newPatient: { fullName: string; phone: string; email: string | null; guardianName: string | null } | null = null;
   if (!Number.isInteger(patientId)) {
     const fullName = str(fd, "fullName");
     const phone = normalizePhone(str(fd, "phone"));
-    const email = str(fd, "email");
     if (fullName.length < 3) return { error: "Unesite ime i prezime pacijenta (ili izaberite postojećeg)." };
     if (!phone) return { error: "Unesite ispravan broj telefona." };
-    const [row] = await db
-      .insert(patients)
-      .values({ fullName, phone, email: email || null, guardianName: str(fd, "guardianName") || null, source: "phone" })
-      .returning({ id: patients.id });
-    patientId = row.id;
+    newPatient = { fullName, phone, email: str(fd, "email") || null, guardianName: str(fd, "guardianName") || null };
   }
 
+  // Provera preklapanja PRE upisa pacijenta: ranije je karton nastajao i kada termin nije zakazan,
+  // pa je ponovni pokušaj („Zakaži uprkos preklapanju“) pravio drugi karton iste osobe.
   const start = timeToMin(time);
   const end = start + (duration > 0 ? Math.round(duration) : svc.durationMin);
   if (!force) {
     const conflict = await findConflict(doctorId, date, start, end);
     if (conflict) return { error: `${conflict} Označite „Zakaži uprkos preklapanju“ ako ste sigurni.` };
+  }
+
+  if (newPatient) {
+    const existing = await findPatient(newPatient.phone, newPatient.fullName);
+    if (existing) {
+      patientId = existing.id;
+      if ((newPatient.email && newPatient.email !== existing.email) || (newPatient.guardianName && !existing.guardianName)) {
+        await db
+          .update(patients)
+          .set({ email: newPatient.email ?? existing.email, guardianName: existing.guardianName ?? newPatient.guardianName })
+          .where(eq(patients.id, existing.id));
+      }
+    } else {
+      const [row] = await db
+        .insert(patients)
+        .values({ ...newPatient, source: "phone" })
+        .returning({ id: patients.id });
+      patientId = row.id;
+    }
   }
   const [row] = await db
     .insert(appointments)
@@ -296,6 +326,9 @@ export async function createPatientAction(_prev: FormState, fd: FormData): Promi
   const phone = normalizePhone(str(fd, "phone"));
   if (fullName.length < 3) return { error: "Unesite ime i prezime." };
   if (!phone) return { error: "Unesite ispravan broj telefona." };
+  // Pacijent sa istim imenom i brojem već postoji: otvaramo njegov karton umesto da pravimo drugi
+  const existing = await findPatient(phone, fullName);
+  if (existing) redirect(`/admin/pacijenti/${existing.id}?postoji=1`);
   const birthYear = num(fd, "birthYear");
   const [row] = await db
     .insert(patients)
@@ -413,26 +446,50 @@ export async function saveScheduleAction(fd: FormData) {
   revalidateAdmin();
 }
 
-export async function addTimeOffAction(fd: FormData) {
+export type TimeOffState = FormState & {
+  /** Termini koji su već zakazani u periodu odsustva: odsustvo ih ne pomera, pacijente treba obavestiti. */
+  affected?: { id: number; date: string; start: number; patient: string; doctor: string | null }[];
+};
+
+export async function addTimeOffAction(_prev: TimeOffState, fd: FormData): Promise<TimeOffState> {
   const s = await requireSession();
   const who = str(fd, "doctorId");
   const doctorId = who === "all" ? null : Number(who);
-  if (doctorId === null ? s.role !== "admin" : !Number.isInteger(doctorId) || (s.role !== "admin" && doctorId !== s.id)) return;
+  if (doctorId === null ? s.role !== "admin" : !Number.isInteger(doctorId) || (s.role !== "admin" && doctorId !== s.id)) {
+    return { error: "Nemate dozvolu za ovu izmenu." };
+  }
   const dateFrom = str(fd, "dateFrom");
   const dateTo = str(fd, "dateTo") || dateFrom;
-  if (!isValidDate(dateFrom) || !isValidDate(dateTo) || dateTo < dateFrom) return;
+  if (!isValidDate(dateFrom) || !isValidDate(dateTo)) return { error: "Unesite ispravan datum." };
+  if (dateTo < dateFrom) return { error: "Datum „do“ je pre datuma „od“." };
   const from = str(fd, "from");
   const to = str(fd, "to");
   const partial = dateFrom === dateTo && isValidTime(from) && isValidTime(to) && timeToMin(to) > timeToMin(from);
-  await db.insert(timeOff).values({
-    doctorId,
-    dateFrom,
-    dateTo,
-    startMin: partial ? timeToMin(from) : null,
-    endMin: partial ? timeToMin(to) : null,
-    reason: str(fd, "reason") || null,
-  });
+  const startMin = partial ? timeToMin(from) : null;
+  const endMin = partial ? timeToMin(to) : null;
+  await db.insert(timeOff).values({ doctorId, dateFrom, dateTo, startMin, endMin, reason: str(fd, "reason") || null });
+
+  // Odsustvo samo zatvara online zakazivanje; pacijenti koji su već zakazali i dalje imaju termin
+  // i doći će u ordinaciju. Zato odmah pokazujemo koga treba pozvati.
+  const rows = await db
+    .select({ id: appointments.id, date: appointments.date, start: appointments.startMin, end: appointments.endMin, patient: patients.fullName, doctor: doctors.name })
+    .from(appointments)
+    .innerJoin(patients, eq(appointments.patientId, patients.id))
+    .leftJoin(doctors, eq(appointments.doctorId, doctors.id))
+    .where(
+      and(
+        inArray(appointments.status, ["confirmed", "pending"]),
+        sql`${appointments.date} between ${dateFrom} and ${dateTo}`,
+        doctorId === null ? undefined : eq(appointments.doctorId, doctorId),
+      ),
+    )
+    .orderBy(appointments.date, appointments.startMin);
+  const today = nowInClinic().date;
+  const affected = rows
+    .filter((r) => r.date! >= today && r.start != null && r.end != null && (startMin == null || endMin == null || (r.start < endMin && r.end > startMin)))
+    .map((r) => ({ id: r.id, date: r.date!, start: r.start!, patient: r.patient, doctor: r.doctor }));
   revalidateAdmin();
+  return { ok: true, message: "Odsustvo je dodato. Online zakazivanje u tom periodu više nije moguće.", affected };
 }
 
 export async function deleteTimeOffAction(fd: FormData) {

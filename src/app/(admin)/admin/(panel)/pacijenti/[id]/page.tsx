@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarPlus, Mail, MessageCircle, Phone } from "lucide-react";
+import { ArrowLeft, CalendarPlus, Info, Mail, MessageCircle, Phone } from "lucide-react";
 import { PatientForm, TreatmentForm } from "@/components/admin/forms";
 import { SubmitButton } from "@/components/admin/SubmitButton";
 import { Empty, METHOD_LABEL, PageHeader, Panel, rsd, StatTile, StatusBadge } from "@/components/admin/ui";
@@ -14,10 +14,10 @@ import { fmtDateMedium, minToTime, nowInClinic } from "@/lib/time";
 
 export const metadata: Metadata = { title: "Karton pacijenta" };
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ postoji?: string }> };
 
-export default async function PatientPage({ params }: Props) {
-  const [, { id: rawId }] = await Promise.all([requireSession(), params]);
+export default async function PatientPage({ params, searchParams }: Props) {
+  const [, { id: rawId }, sp] = await Promise.all([requireSession(), params, searchParams]);
   const id = Number(rawId);
   if (!Number.isInteger(id)) notFound();
   const [data, svcs] = await Promise.all([patientDetail(id), allServices()]);
@@ -32,6 +32,11 @@ export default async function PatientPage({ params }: Props) {
       <Link href="/admin/pacijenti" className="mb-4 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-ink">
         <ArrowLeft className="h-4 w-4" /> Svi pacijenti
       </Link>
+      {sp.postoji && (
+        <p className="mb-4 flex items-center gap-2 rounded-2xl bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-900">
+          <Info className="h-4 w-4 shrink-0" /> Pacijent sa ovim imenom i brojem telefona već postoji, pa je otvoren njegov karton (nije napravljen novi).
+        </p>
+      )}
       <PageHeader
         title={p.fullName}
         subtitle={

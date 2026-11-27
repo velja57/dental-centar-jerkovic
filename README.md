@@ -30,6 +30,7 @@ npm run dev          # http://localhost:3100
 | Česta pitanja na početnoj | `src/content/faq.ts` |
 | Svi ostali tekstovi sajta (srpski/engleski) | `src/lib/dictionaries.ts` |
 | Fotografije (trenutno privremene sa Unsplash-a) | `src/content/images.ts` |
+| Slika za pregled linka (Viber, WhatsApp, Facebook) — sadrži adresu i telefon | `public/og-sr.png`, `public/og-en.png` → `node scripts/og-slika.cjs` |
 | Politika privatnosti (nacrt — proveriti sa pravnikom) | `src/app/(site)/[locale]/privatnost/page.tsx` |
 
 ## Funkcije

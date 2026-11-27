@@ -1,8 +1,10 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { CircleCheck, CircleExclamationPoint, LoaderCircle } from "lucide-react";
+import Link from "next/link";
 import {
+  addTimeOffAction,
   addTreatmentAction,
   changePasswordAction,
   createAppointmentAction,
@@ -12,8 +14,12 @@ import {
   scheduleAction,
   updatePatientAction,
   type FormState,
+  type TimeOffState,
 } from "@/lib/admin-actions";
 import { fmtNumber } from "@/lib/format";
+import { doctorTitle } from "@/lib/site";
+import { fmtDateMedium, minToTime } from "@/lib/time";
+import { keepOnSubmit } from "./KeepForm";
 import { FieldLabel } from "./ui";
 import { SubmitButton } from "./SubmitButton";
 
@@ -36,15 +42,20 @@ function Feedback({ state }: { state: FormState }) {
 // ——— Prijava ———
 export function LoginForm() {
   const [state, action, pending] = useActionState(loginAction, {});
+  const passwordRef = useRef<HTMLInputElement>(null);
+  // Posle pogrešne lozinke korisničko ime ostaje, a lozinka se briše (kao na svakom sajtu)
+  useEffect(() => {
+    if (state.error && passwordRef.current) passwordRef.current.value = "";
+  }, [state]);
   return (
-    <form action={action} className="grid gap-4">
+    <form action={action} onSubmit={keepOnSubmit(action)} className="grid gap-4">
       <div>
         <FieldLabel htmlFor="username">Korisničko ime</FieldLabel>
         <input id="username" name="username" className="input" autoComplete="username" autoCapitalize="none" required />
       </div>
       <div>
         <FieldLabel htmlFor="password">Lozinka</FieldLabel>
-        <input id="password" name="password" type="password" className="input" autoComplete="current-password" required />
+        <input ref={passwordRef} id="password" name="password" type="password" className="input" autoComplete="current-password" required />
       </div>
       <Feedback state={state} />
       <button type="submit" disabled={pending} className="btn btn-brand btn-lg w-full">
@@ -72,7 +83,7 @@ export function ScheduleForm({
 }) {
   const [state, action] = useActionState(scheduleAction, {});
   return (
-    <form action={action} className="grid gap-4">
+    <form action={action} onSubmit={keepOnSubmit(action)} className="grid gap-4">
       <input type="hidden" name="id" value={id} />
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
@@ -143,7 +154,7 @@ export function NewAppointmentForm({
   const hasEmail = patient ? !!patient.email : email.includes("@");
 
   return (
-    <form action={action} className="grid gap-6">
+    <form action={action} onSubmit={keepOnSubmit(action)} className="grid gap-6">
       {patient ? (
         <input type="hidden" name="patientId" value={patient.id} />
       ) : (
@@ -245,7 +256,7 @@ export function PatientForm({
 }) {
   const [state, action] = useActionState(patient ? updatePatientAction : createPatientAction, {});
   return (
-    <form action={action} className="grid gap-3 sm:grid-cols-2">
+    <form action={action} onSubmit={keepOnSubmit(action)} className="grid gap-3 sm:grid-cols-2">
       {patient && <input type="hidden" name="id" value={patient.id} />}
       <div className="sm:col-span-2">
         <FieldLabel htmlFor="p-name">Ime i prezime</FieldLabel>
@@ -422,6 +433,83 @@ export function RunJobsForm() {
       <Feedback state={state} />
       <div>
         <SubmitButton className="btn btn-outline">Pokreni podsetnike sada</SubmitButton>
+      </div>
+    </form>
+  );
+}
+
+// ——— Odsustvo / praznik ———
+export function TimeOffForm({
+  doctors,
+  allowClinicWide,
+  defaultWho,
+  today,
+}: {
+  doctors: { id: number; name: string }[];
+  allowClinicWide: boolean;
+  defaultWho: string;
+  today: string;
+}) {
+  const [state, action] = useActionState<TimeOffState, FormData>(addTimeOffAction, {});
+  const affected = state.affected ?? [];
+  return (
+    <form action={action} className="grid gap-3">
+      <div>
+        <FieldLabel htmlFor="off-who">Ko</FieldLabel>
+        <select id="off-who" name="doctorId" className="input" defaultValue={defaultWho}>
+          {allowClinicWide && <option value="all">Cela ordinacija (praznik, kolektivni odmor)</option>}
+          {doctors.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <FieldLabel htmlFor="off-from">Od datuma</FieldLabel>
+          <input id="off-from" name="dateFrom" type="date" defaultValue={today} className="input" required />
+        </div>
+        <div>
+          <FieldLabel htmlFor="off-to">Do datuma</FieldLabel>
+          <input id="off-to" name="dateTo" type="date" className="input" />
+        </div>
+        <div>
+          <FieldLabel htmlFor="off-start">Od (deo dana)</FieldLabel>
+          <input id="off-start" name="from" type="time" step={900} className="input" />
+        </div>
+        <div>
+          <FieldLabel htmlFor="off-end">Do</FieldLabel>
+          <input id="off-end" name="to" type="time" step={900} className="input" />
+        </div>
+      </div>
+      <div>
+        <FieldLabel htmlFor="off-reason">Razlog (vidi samo osoblje)</FieldLabel>
+        <input id="off-reason" name="reason" className="input" placeholder="Godišnji odmor, seminar…" />
+      </div>
+      <p className="text-xs text-slate-500">Vreme popunite samo za blokadu dela jednog dana. U tom periodu online zakazivanje nije moguće.</p>
+      <Feedback state={state} />
+      {affected.length > 0 && (
+        <div role="alert" className="rounded-xl bg-amber-50 px-3 py-3 text-sm text-amber-900">
+          <p className="font-bold">
+            {affected.length === 1 ? "U tom periodu već postoji 1 zakazan termin." : `U tom periodu već postoje zakazani termini: ${affected.length}.`} Odsustvo ih ne pomera:
+            pacijenti će doći ako ih ne obavestite.
+          </p>
+          <ul className="mt-2 grid gap-1">
+            {affected.map((a) => (
+              <li key={a.id}>
+                <Link href={`/admin/termini/${a.id}`} className="font-semibold underline">
+                  {fmtDateMedium(a.date, "sr")} u {minToTime(a.start)} · {a.patient}
+                </Link>
+                {a.doctor && <span className="text-amber-800"> · {doctorTitle(a.doctor, "sr")}</span>}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-xs">Otvorite termin da pozovete pacijenta, pošaljete WhatsApp poruku, pomerite ili otkažete termin.</p>
+        </div>
+      )}
+      <div>
+        <SubmitButton>Dodaj</SubmitButton>
       </div>
     </form>
   );

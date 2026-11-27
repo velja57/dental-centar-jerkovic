@@ -8,7 +8,6 @@ import { Header } from "@/components/site/Header";
 import { JsonLd } from "@/components/site/JsonLd";
 import { SiteAnalytics } from "@/components/site/SiteAnalytics";
 import { clinic } from "@/content/clinic";
-import { images } from "@/content/images";
 import { getDict } from "@/lib/dictionaries";
 import { isLocale, locales } from "@/lib/i18n";
 import { dentistJsonLd } from "@/lib/jsonld";
@@ -36,7 +35,19 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       type: "website",
       siteName: clinic.name,
       locale: loc === "sr" ? "sr_RS" : "en_US",
-      images: [{ url: `${images.familyThree.src}?auto=format&fit=crop&w=1200&h=630&q=70`, width: 1200, height: 630, alt: images.familyThree.alt[loc] }],
+      // Slika za pregled linka na Viberu, WhatsApp-u i Facebook-u: logotip, naziv, adresa i telefon ordinacije
+      // (ranije stock fotografija nepoznate porodice). Pravi se iz logotipa; menja se uz promenu broja ili adrese.
+      images: [
+        {
+          url: `/og-${loc}.png`,
+          width: 1200,
+          height: 630,
+          alt:
+            loc === "sr"
+              ? `${clinic.name}, stomatološka ordinacija u Batajnici: ${clinic.address.street}, ${clinic.phoneDisplay}`
+              : `${clinic.name}, dental clinic in Batajnica, Belgrade: ${clinic.address.street}, ${clinic.phoneDisplay}`,
+        },
+      ],
     },
     twitter: { card: "summary_large_image" },
     // Google Search Console (svojstvo „URL prefix“): kod iz GSC → Vercel env GOOGLE_SITE_VERIFICATION

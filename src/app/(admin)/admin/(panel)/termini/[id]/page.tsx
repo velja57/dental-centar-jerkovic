@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CircleCheck, Mail, MessageCircle, Phone, Trash } from "lucide-react";
+import { ConfirmSubmit } from "@/components/admin/ConfirmSubmit";
 import { ScheduleForm, TreatmentForm } from "@/components/admin/forms";
 import { SubmitButton } from "@/components/admin/SubmitButton";
 import { METHOD_LABEL, PageHeader, Panel, rsd, SOURCE_LABEL, StatusBadge } from "@/components/admin/ui";
@@ -190,7 +191,13 @@ export default async function AppointmentDetailPage({ params, searchParams }: Pr
                         <input type="checkbox" name="notify" value="1" defaultChecked className="h-3.5 w-3.5 accent-brand-600" /> obavesti
                       </label>
                     )}
-                    <SubmitButton className="btn btn-sm bg-amber-50 text-amber-800 ring-1 ring-amber-200 hover:bg-amber-100">Otkaži termin</SubmitButton>
+                    <ConfirmSubmit
+                      className="btn btn-sm bg-amber-50 text-amber-800 ring-1 ring-amber-200 hover:bg-amber-100"
+                      question="Otkazati termin?"
+                      confirmLabel="Da, otkaži"
+                    >
+                      Otkaži termin
+                    </ConfirmSubmit>
                   </form>
                 )}
               </div>
@@ -229,9 +236,14 @@ export default async function AppointmentDetailPage({ params, searchParams }: Pr
                       <strong className="whitespace-nowrap text-ink tabular-nums">{rsd(t.total)}</strong>
                       <form action={deleteTreatmentAction}>
                         <input type="hidden" name="id" value={t.id} />
-                        <button className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Obriši rad">
+                        <ConfirmSubmit
+                          className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
+                          ariaLabel="Obriši rad"
+                          question="Obrisati rad?"
+                          confirmLabel="Da, obriši"
+                        >
                           <Trash className="h-4 w-4" />
-                        </button>
+                        </ConfirmSubmit>
                       </form>
                     </span>
                   </li>
@@ -265,9 +277,14 @@ export default async function AppointmentDetailPage({ params, searchParams }: Pr
                       <strong className="whitespace-nowrap text-ink tabular-nums">{rsd(p.amount)}</strong>
                       <form action={deletePaymentAction}>
                         <input type="hidden" name="id" value={p.id} />
-                        <button className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Obriši uplatu">
+                        <ConfirmSubmit
+                          className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
+                          ariaLabel="Obriši uplatu"
+                          question="Obrisati uplatu?"
+                          confirmLabel="Da, obriši"
+                        >
                           <Trash className="h-4 w-4" />
-                        </button>
+                        </ConfirmSubmit>
                       </form>
                     </span>
                   </li>

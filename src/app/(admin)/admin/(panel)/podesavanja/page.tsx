@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Trash } from "lucide-react";
-import { PasswordForm } from "@/components/admin/forms";
+import { ConfirmSubmit } from "@/components/admin/ConfirmSubmit";
+import { PasswordForm, TimeOffForm } from "@/components/admin/forms";
+import { KeepForm } from "@/components/admin/KeepForm";
 import { SubmitButton } from "@/components/admin/SubmitButton";
 import { PageHeader, Panel, SPECIALTY_LABEL } from "@/components/admin/ui";
 import { categories } from "@/content/services";
 import {
-  addTimeOffAction,
   createServiceAction,
   deleteDemoDataAction,
   deleteTimeOffAction,
@@ -74,7 +75,7 @@ export default async function SettingsPage({ searchParams }: Props) {
                     const slugs = parseSlugs(x.doctorSlugs);
                     return (
                       <li key={x.id} className="p-4">
-                        <form action={updateServiceAction} className="grid items-end gap-3 md:grid-cols-12">
+                        <KeepForm action={updateServiceAction} className="grid items-end gap-3 md:grid-cols-12">
                           <input type="hidden" name="id" value={x.id} />
                           <div className="md:col-span-4">
                             <label className="mb-1 block text-[12px] font-semibold text-slate-500">Naziv (srpski / engleski)</label>
@@ -125,9 +126,11 @@ export default async function SettingsPage({ searchParams }: Props) {
                             </label>
                           </div>
                           <div className="md:col-span-3 md:text-right">
-                            <SubmitButton className="btn btn-outline btn-sm">Sačuvaj</SubmitButton>
+                            <SubmitButton className="btn btn-outline btn-sm" doneText="Sačuvano">
+                              Sačuvaj
+                            </SubmitButton>
                           </div>
-                        </form>
+                        </KeepForm>
                       </li>
                     );
                   })}
@@ -201,7 +204,9 @@ export default async function SettingsPage({ searchParams }: Props) {
                   );
                 })}
                 <div className="pt-2">
-                  <SubmitButton className="btn btn-outline btn-sm">Sačuvaj raspored</SubmitButton>
+                  <SubmitButton className="btn btn-outline btn-sm" doneText="Raspored je sačuvan">
+                  Sačuvaj raspored
+                </SubmitButton>
                 </div>
               </form>
             </Panel>
@@ -232,9 +237,14 @@ export default async function SettingsPage({ searchParams }: Props) {
                     {(isAdmin || t.doctorId === s.id) && (
                       <form action={deleteTimeOffAction}>
                         <input type="hidden" name="id" value={t.id} />
-                        <button className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600" aria-label="Obriši">
+                        <ConfirmSubmit
+                          className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600"
+                          ariaLabel="Obriši odsustvo"
+                          question="Obrisati odsustvo?"
+                          confirmLabel="Da, obriši"
+                        >
                           <Trash className="h-4 w-4" />
-                        </button>
+                        </ConfirmSubmit>
                       </form>
                     )}
                   </li>
@@ -243,45 +253,12 @@ export default async function SettingsPage({ searchParams }: Props) {
             )}
           </Panel>
           <Panel title="Dodaj odsustvo">
-            <form action={addTimeOffAction} className="grid gap-3">
-              <div>
-                <label className="mb-1 block text-[13px] font-semibold text-slate-600">Ko</label>
-                <select name="doctorId" className="input" defaultValue={isAdmin ? "all" : String(s.id)}>
-                  {isAdmin && <option value="all">Cela ordinacija (praznik, kolektivni odmor)</option>}
-                  {editableDocs.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {doctorTitle(d.name, "sr")}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1 block text-[13px] font-semibold text-slate-600">Od datuma</label>
-                  <input name="dateFrom" type="date" defaultValue={now.date} className="input" required />
-                </div>
-                <div>
-                  <label className="mb-1 block text-[13px] font-semibold text-slate-600">Do datuma</label>
-                  <input name="dateTo" type="date" className="input" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-[13px] font-semibold text-slate-600">Od (deo dana)</label>
-                  <input name="from" type="time" step={900} className="input" />
-                </div>
-                <div>
-                  <label className="mb-1 block text-[13px] font-semibold text-slate-600">Do</label>
-                  <input name="to" type="time" step={900} className="input" />
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-[13px] font-semibold text-slate-600">Razlog (vidi samo osoblje)</label>
-                <input name="reason" className="input" placeholder="Godišnji odmor, seminar…" />
-              </div>
-              <p className="text-xs text-slate-500">Vreme popunite samo za blokadu dela jednog dana. U tom periodu online zakazivanje nije moguće.</p>
-              <div>
-                <SubmitButton>Dodaj</SubmitButton>
-              </div>
-            </form>
+            <TimeOffForm
+              doctors={editableDocs.map((d) => ({ id: d.id, name: doctorTitle(d.name, "sr") }))}
+              allowClinicWide={isAdmin}
+              defaultWho={isAdmin ? "all" : String(s.id)}
+              today={now.date}
+            />
           </Panel>
         </div>
       )}
@@ -313,7 +290,9 @@ export default async function SettingsPage({ searchParams }: Props) {
                   <input type="checkbox" name="active" value="1" defaultChecked={d.active} className="h-4 w-4 accent-brand-600" /> Aktivan (prikazan na sajtu i u zakazivanju)
                 </label>
                 <div>
-                  <SubmitButton className="btn btn-outline btn-sm">Sačuvaj</SubmitButton>
+                  <SubmitButton className="btn btn-outline btn-sm" doneText="Sačuvano">
+                    Sačuvaj
+                  </SubmitButton>
                 </div>
               </form>
             </Panel>
