@@ -8,7 +8,7 @@ import { Empty, METHOD_LABEL, PageHeader, Panel, rsd, StatTile, StatusBadge } fr
 import { addPaymentAction } from "@/lib/admin-actions";
 import { allServices, patientDetail } from "@/lib/admin-data";
 import { requireSession } from "@/lib/auth";
-import { displayPhone, waNumber } from "@/lib/phone";
+import { displayPhone, telHref, waNumber } from "@/lib/phone";
 import { doctorTitle } from "@/lib/site";
 import { fmtDateMedium, minToTime, nowInClinic } from "@/lib/time";
 
@@ -41,7 +41,7 @@ export default async function PatientPage({ params, searchParams }: Props) {
         title={p.fullName}
         subtitle={
           <span className="flex flex-wrap gap-x-4 gap-y-1">
-            <a href={`tel:${p.phone}`} className="font-semibold text-brand-700">
+            <a href={telHref(p.phone)} className="font-semibold text-brand-700">
               {displayPhone(p.phone)}
             </a>
             {p.email && <span>{p.email}</span>}
@@ -56,7 +56,7 @@ export default async function PatientPage({ params, searchParams }: Props) {
             <a href={`https://wa.me/${waNumber(p.phone)}`} target="_blank" rel="noopener" className="btn btn-outline">
               <MessageCircle className="h-4 w-4" /> WhatsApp
             </a>
-            <a href={`tel:${p.phone}`} className="btn btn-outline" aria-label="Pozovi">
+            <a href={telHref(p.phone)} className="btn btn-outline" aria-label="Pozovi">
               <Phone className="h-4 w-4" />
             </a>
             {p.email && (

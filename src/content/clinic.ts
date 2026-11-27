@@ -46,6 +46,9 @@ export const clinic = {
     slotStep: 15, // korak ponuđenih termina u minutima
     chairs: 2, // broj stolica: najviše toliko termina istovremeno (bez obzira na doktora)
     maxActivePerPhone: 3, // zaštita od zloupotrebe
+    // Državni i verski neradni dani (Nova godina, Božić, Sretenje, Vaskrs, 1. maj, Dan primirja) zatvoreni su
+    // za online zakazivanje (src/lib/holidays.ts). Staviti false ako ordinacija radi za praznike.
+    closedOnHolidays: true,
   },
   eurRate: 117.2, // okvirni kurs za prikaz cena u evrima (engleska verzija)
   social: {

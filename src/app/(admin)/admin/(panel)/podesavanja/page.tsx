@@ -19,7 +19,9 @@ import { allDoctors, allServices, scheduleRows, timeOffRows } from "@/lib/admin-
 import { parseSlugs } from "@/lib/availability";
 import { requireSession } from "@/lib/auth";
 import { doctorTitle } from "@/lib/site";
-import { fmtDateMedium, minToTime, nowInClinic, weekdayName } from "@/lib/time";
+import { addDays, fmtDateMedium, minToTime, nowInClinic, weekdayName } from "@/lib/time";
+import { holidaysBetween } from "@/lib/holidays";
+import { clinic } from "@/content/clinic";
 
 export const metadata: Metadata = { title: "Podešavanja" };
 
@@ -42,6 +44,7 @@ export default async function SettingsPage({ searchParams }: Props) {
   const tab = tabs.some((t) => t.key === sp.tab) ? sp.tab! : tabs[0].key;
   const [docs, svcs, sch, offs] = await Promise.all([allDoctors(), allServices(), scheduleRows(), timeOffRows()]);
   const now = nowInClinic();
+  const upcomingHolidays = clinic.booking.closedOnHolidays ? holidaysBetween(now.date, addDays(now.date, clinic.booking.horizonDays + 30)) : [];
   const editableDocs = isAdmin ? docs : docs.filter((d) => d.id === s.id);
 
   return (
@@ -250,6 +253,19 @@ export default async function SettingsPage({ searchParams }: Props) {
                   </li>
                 ))}
               </ul>
+            )}
+            {upcomingHolidays.length > 0 && (
+              <div className="border-t border-slate-100 px-5 py-4 text-sm">
+                <p className="font-semibold text-ink">Državni i verski praznici (online zakazivanje je zatvoreno automatski)</p>
+                <ul className="mt-2 grid gap-1 text-slate-600 sm:grid-cols-2">
+                  {upcomingHolidays.map((h) => (
+                    <li key={h.date}>
+                      {fmtDateMedium(h.date, "sr")} · {h.sr}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-xs text-slate-500">Ako ordinacija radi nekog praznika, javite da se to uključi u podešavanjima sajta.</p>
+              </div>
             )}
           </Panel>
           <Panel title="Dodaj odsustvo">

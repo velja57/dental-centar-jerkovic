@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, gte, inArray, isNull, lte, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNull, lte, or, sql, type AnyColumn, type SQL } from "drizzle-orm";
 import { db } from "@/db";
 import { appointments, doctors, emailOutbox, patients, payments, schedules, services, timeOff, treatments } from "@/db/schema";
 import type { Session } from "@/lib/auth";
@@ -188,16 +188,51 @@ export async function calendarData(from: string, to: string) {
   return { items, sch, off };
 }
 
+// ——— Pretraga pacijenata ———
+// SQLite „like“ razlikuje č/ć/š/ž/đ od c/s/z/dj i ne pretvara Č u č, a telefon se čuva kao +381641234567,
+// dok ga admin prikazuje kao „064 123 4567“. Bez ovoga „jovanovic“ ne nalazi „Jovanović“,
+// a ni broj prepisan sa ekrana („064 123 4567“) ne nalazi nikoga.
+const FOLD: [string, string][] = [
+  ["Č", "c"], ["č", "c"], ["Ć", "c"], ["ć", "c"], ["Š", "s"], ["š", "s"],
+  ["Ž", "z"], ["ž", "z"], ["Đ", "dj"], ["đ", "dj"],
+];
+
+function foldText(v: string) {
+  let out = v.toLocaleLowerCase("sr");
+  for (const [from, to] of FOLD) out = out.split(from.toLocaleLowerCase("sr")).join(to);
+  return out.replace(/\s+/g, " ").trim();
+}
+
+function foldColumn(col: AnyColumn) {
+  let expr: SQL = sql`coalesce(${col}, '')`;
+  for (const [from, to] of FOLD) expr = sql`replace(${expr}, ${from}, ${to})`;
+  return sql`lower(${expr})`;
+}
+
+export function patientSearch(q: string): SQL | undefined {
+  const text = foldText(q);
+  if (!text) return undefined;
+  const like = `%${text}%`;
+  const conds: SQL[] = [
+    sql`${foldColumn(patients.fullName)} like ${like}`,
+    sql`${foldColumn(patients.guardianName)} like ${like}`,
+    sql`${foldColumn(patients.email)} like ${like}`,
+  ];
+  // Broj telefona u bilo kom obliku: „064 123 4567“, „0641234567“, „+381 64 123…“, deo broja
+  if (/^[\d\s+\-()./]+$/.test(q.trim())) {
+    const core = q.replace(/\D/g, "").replace(/^00/, "").replace(/^381/, "").replace(/^0/, "");
+    if (core.length >= 3) conds.push(sql`${patients.phone} like ${`%${core}%`}`);
+  }
+  return or(...conds);
+}
+
 export type ListFilter = "upcoming" | "today" | "pending" | "past" | "cancelled" | "all";
 
 export async function listAppointments(s: Session, filter: ListFilter, q: string, doctorId: number | null) {
   const now = nowInClinic();
   const conds: (SQL | undefined)[] = [filter === "pending" ? pendingScope(s) : doctorScope(s)];
   if (doctorId && s.role === "admin") conds.push(eq(appointments.doctorId, doctorId));
-  if (q) {
-    const like = `%${q}%`;
-    conds.push(or(sql`${patients.fullName} like ${like}`, sql`${patients.phone} like ${like}`, sql`${patients.email} like ${like}`));
-  }
+  if (q) conds.push(patientSearch(q));
   let order = [asc(appointments.date), asc(appointments.startMin)];
   switch (filter) {
     case "upcoming":
@@ -255,7 +290,6 @@ export async function patientBalance(patientId: number) {
 
 export async function listPatients(q: string) {
   const now = nowInClinic();
-  const like = `%${q}%`;
   return db
     .select({
       id: patients.id,
@@ -271,7 +305,7 @@ export async function listPatients(q: string) {
       visits: sql<number>`(select count(*) from appointments a where a.patient_id = "patients"."id" and a.status = 'completed')`,
     })
     .from(patients)
-    .where(q ? or(sql`${patients.fullName} like ${like}`, sql`${patients.phone} like ${like}`, sql`${patients.email} like ${like}`) : undefined)
+    .where(q ? patientSearch(q) : undefined)
     .orderBy(asc(patients.fullName))
     .limit(300);
 }

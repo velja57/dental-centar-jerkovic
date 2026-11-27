@@ -93,6 +93,7 @@ export default async function AppointmentPage({ params }: Props) {
             retry: b.retry,
             closedDay: b.closedDay,
             fullDay: b.fullDay,
+            holiday: b.holiday,
             prevDays: b.prevDays,
             nextDays: b.nextDays,
           }}

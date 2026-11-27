@@ -254,6 +254,7 @@ export function BookingWizard(props: Props) {
     retry: t.retry,
     closedDay: t.closedDay,
     fullDay: t.fullDay,
+    holiday: t.holiday,
     prevDays: t.prevDays,
     nextDays: t.nextDays,
   };

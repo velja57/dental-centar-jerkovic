@@ -16,7 +16,7 @@ import {
 } from "@/lib/admin-actions";
 import { allDoctors, allServices, appointmentDetail } from "@/lib/admin-data";
 import { requireSession } from "@/lib/auth";
-import { displayPhone, waNumber } from "@/lib/phone";
+import { displayPhone, telHref, waNumber } from "@/lib/phone";
 import { doctorTitle } from "@/lib/site";
 import { fmtDateLong, fmtDateMedium, fmtStamp, minToTime, nowInClinic } from "@/lib/time";
 
@@ -55,7 +55,7 @@ export default async function AppointmentDetailPage({ params, searchParams }: Pr
     ? `Poštovani, podsećamo vas na termin u ordinaciji ${clinic.name}: ${fmtDateLong(a.date!, "sr")} u ${minToTime(a.startMin!)} (${a.serviceName}). Adresa: ${clinic.address.street}, ${clinic.address.city}. Za izmene pozovite ${clinic.phoneDisplay}.`
     : `Poštovani, javljamo se povodom vašeg zahteva za termin (${a.serviceName}) u ordinaciji ${clinic.name}.`;
   const waHref = `https://wa.me/${waNumber(a.patientPhone)}?text=${encodeURIComponent(reminder)}`;
-  const viberHref = `viber://chat?number=${encodeURIComponent(a.patientPhone)}`;
+  const viberHref = `viber://chat?number=${encodeURIComponent(`+${waNumber(a.patientPhone)}`)}`;
   const doctorOptions = docs.filter((d) => d.active).map((d) => ({ id: d.id, name: doctorTitle(d.name, "sr") }));
 
   return (
@@ -95,7 +95,7 @@ export default async function AppointmentDetailPage({ params, searchParams }: Pr
               <div className="flex justify-between gap-4">
                 <dt className="text-slate-500">Telefon</dt>
                 <dd>
-                  <a href={`tel:${a.patientPhone}`} className="font-semibold text-brand-700">
+                  <a href={telHref(a.patientPhone)} className="font-semibold text-brand-700">
                     {displayPhone(a.patientPhone)}
                   </a>
                 </dd>
@@ -134,7 +134,7 @@ export default async function AppointmentDetailPage({ params, searchParams }: Pr
               )}
             </dl>
             <div className="mt-4 flex flex-wrap gap-2">
-              <a href={`tel:${a.patientPhone}`} className="btn btn-outline btn-sm">
+              <a href={telHref(a.patientPhone)} className="btn btn-outline btn-sm">
                 <Phone className="h-4 w-4" /> Pozovi
               </a>
               <a href={waHref} target="_blank" rel="noopener" className="btn btn-sm bg-[#25D366]/12 text-[#128C4B] hover:bg-[#25D366]/20">

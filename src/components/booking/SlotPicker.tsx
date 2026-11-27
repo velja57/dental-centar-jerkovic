@@ -17,13 +17,14 @@ export type SlotLabels = {
   retry: string;
   closedDay: string;
   fullDay: string;
+  holiday?: string;
   prevDays: string;
   nextDays: string;
 };
 
 export type SlotContact = { phone: string; telHref: string };
 
-type Day = { date: string; open: boolean; slots: { start: number; doctorIds: number[] }[] };
+type Day = { date: string; open: boolean; holiday?: boolean; slots: { start: number; doctorIds: number[] }[] };
 type Resp = { days: Day[]; today: string; horizonEnd: string };
 
 const PAGE = 14;
@@ -181,7 +182,7 @@ export function SlotPicker({
       </div>
 
       <div className="no-scrollbar -mx-1 mt-3 flex snap-x gap-2 overflow-x-auto px-1 pb-2">
-        {(data?.days ?? Array.from({ length: 7 }, (_, i) => ({ date: `skeleton-${i}`, open: false, slots: [] }))).map((d) => {
+        {(data?.days ?? Array.from({ length: 7 }, (_, i): Day => ({ date: `skeleton-${i}`, open: false, slots: [] }))).map((d) => {
           if (d.date.startsWith("skeleton")) {
             return <div key={d.date} className="h-[84px] w-[68px] shrink-0 animate-pulse rounded-2xl bg-slate-100" />;
           }
@@ -207,7 +208,7 @@ export function SlotPicker({
               </span>
               <span className="text-xl leading-tight font-extrabold">{parseDate(d.date).d}</span>
               <span className={`text-[11px] font-semibold ${isActive ? "text-brand-100" : has ? "text-slate-500" : "text-slate-400"}`}>
-                {has ? monthShort(d.date, locale) : d.open ? labels.fullDay : labels.closedDay}
+                {has ? monthShort(d.date, locale) : d.holiday ? (labels.holiday ?? labels.closedDay) : d.open ? labels.fullDay : labels.closedDay}
               </span>
             </button>
           );

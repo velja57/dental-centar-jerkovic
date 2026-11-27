@@ -3,6 +3,7 @@ import { and, eq, gte, inArray, isNull, lte, ne, or } from "drizzle-orm";
 import { db } from "@/db";
 import { appointments, doctors, schedules, services, timeOff } from "@/db/schema";
 import { clinic } from "@/content/clinic";
+import { holidayOn } from "@/lib/holidays";
 import { addDays, nowInClinic, weekdayOf } from "@/lib/time";
 
 export const BLOCKING_STATUSES = ["pending", "confirmed", "completed"];
@@ -40,7 +41,13 @@ function subtract(intervals: Interval[], [s, e]: Interval): Interval[] {
   return out;
 }
 
+/** Neradni dan po zakonu (ako ordinacija ne radi za praznike). */
+export function isClinicHoliday(date: string) {
+  return clinic.booking.closedOnHolidays && holidayOn(date) !== null;
+}
+
 export function isDayOff(ctx: DayContext, doctorId: number, date: string) {
+  if (isClinicHoliday(date)) return true;
   return ctx.timeOff.some(
     (t) => (t.doctorId === null || t.doctorId === doctorId) && date >= t.dateFrom && date <= t.dateTo && (t.startMin == null || t.endMin == null),
   );
@@ -142,7 +149,7 @@ export async function getServiceWithDoctors(serviceId: number) {
   return { service, doctors: docs };
 }
 
-export type DaySlots = { date: string; open: boolean; slots: { start: number; doctorIds: number[] }[] };
+export type DaySlots = { date: string; open: boolean; holiday?: boolean; slots: { start: number; doctorIds: number[] }[] };
 
 export async function getAvailability(opts: {
   serviceId: number;
@@ -178,6 +185,7 @@ export async function getAvailability(opts: {
     days.push({
       date: d,
       open: docs.some((doc) => worksOn(ctx, doc.id, d)),
+      ...(isClinicHoliday(d) ? { holiday: true } : {}),
       slots: [...map.entries()].sort((a, b) => a[0] - b[0]).map(([s, doctorIds]) => ({ start: s, doctorIds })),
     });
   }

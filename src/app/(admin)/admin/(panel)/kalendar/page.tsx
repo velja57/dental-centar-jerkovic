@@ -4,6 +4,8 @@ import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { TimeGrid, type GridColumn } from "@/components/admin/TimeGrid";
 import { PageHeader, SPECIALTY_LABEL } from "@/components/admin/ui";
 import { allDoctors, calendarData } from "@/lib/admin-data";
+import { isClinicHoliday } from "@/lib/availability";
+import { holidayOn } from "@/lib/holidays";
 import { requireSession } from "@/lib/auth";
 import { doctorTitle } from "@/lib/site";
 import { addDays, fmtDateLong, isValidDate, nowInClinic, parseDate, startOfWeek, weekdayName, weekdayOf } from "@/lib/time";
@@ -43,6 +45,10 @@ export default async function CalendarPage({ searchParams }: Props) {
         end: o.endMin ?? (work[work.length - 1]?.[1] ?? 20 * 60),
         reason: o.reason,
       }));
+    // Državni praznik: online zakazivanje je tog dana zatvoreno (src/lib/holidays.ts)
+    if (isClinicHoliday(day)) {
+      dayOff.push({ start: work[0]?.[0] ?? 8 * 60, end: work[work.length - 1]?.[1] ?? 20 * 60, reason: holidayOn(day)!.sr });
+    }
     return {
       key: `${doctorId}-${day}`,
       title,

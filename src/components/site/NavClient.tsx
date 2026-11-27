@@ -81,6 +81,9 @@ export function MobileNav({
   const pathname = usePathname();
 
   useEffect(() => setOpen(false), [pathname]);
+  // Dodir na stranicu na kojoj ste već (npr. „Zakaži termin“ na zakazivanju) ne menja adresu,
+  // pa se meni ranije nije zatvarao i delovalo je da dugme ne radi.
+  const close = () => setOpen(false);
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
@@ -113,6 +116,7 @@ export function MobileNav({
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={close}
                   aria-current={active ? "page" : undefined}
                   className={`rounded-2xl px-4 py-3.5 text-lg font-bold ${active ? "bg-brand-50 text-brand-800" : "text-ink hover:bg-slate-50"}`}
                 >
@@ -122,13 +126,13 @@ export function MobileNav({
             })}
           </nav>
           <div className="mt-6 grid gap-3">
-            <Link href={bookHref} className="btn btn-primary btn-lg w-full">
+            <Link href={bookHref} onClick={close} className="btn btn-primary btn-lg w-full">
               {labels.book}
             </Link>
-            <a href={telHref} className="btn btn-outline btn-lg w-full">
+            <a href={telHref} onClick={close} className="btn btn-outline btn-lg w-full">
               <Phone className="h-5 w-5" /> {phone}
             </a>
-            <a href={waHref} target="_blank" rel="noopener" className="btn btn-lg w-full bg-[#25D366]/10 text-[#128C4B] hover:bg-[#25D366]/20">
+            <a href={waHref} target="_blank" rel="noopener" onClick={close} className="btn btn-lg w-full bg-[#25D366]/10 text-[#128C4B] hover:bg-[#25D366]/20">
               <WhatsAppIcon /> {labels.whatsapp}
             </a>
           </div>

@@ -1,5 +1,4 @@
 import { clinic } from "@/content/clinic";
-import { images } from "@/content/images";
 import { team } from "@/content/team";
 import { href, type Locale } from "@/lib/i18n";
 import { absoluteUrl, siteUrl } from "@/lib/site";
@@ -26,7 +25,10 @@ export function dentistJsonLd(locale: Locale) {
     url: absoluteUrl(href(locale, "home")),
     telephone: clinic.phoneE164,
     email: clinic.email,
-    image: `${images.clinic.src}?auto=format&fit=crop&w=1200&q=70`,
+    // Ranije stock fotografija tuđe ordinacije (Unsplash), predstavljena Google-u kao fotografija ove ordinacije.
+    // Do pravih fotografija: logotip i slika sa nazivom, adresom i telefonom. Prava fotografija ide prva kad stigne.
+    image: [absoluteUrl(`/og-${locale}.png`), absoluteUrl("/icon-512.png")],
+    logo: absoluteUrl("/icon-512.png"),
     priceRange: "$$",
     currenciesAccepted: "RSD, EUR",
     paymentAccepted: "Cash, Credit Card",
